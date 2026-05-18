@@ -18,6 +18,9 @@ const stickerCards = document.querySelectorAll('.sticker-card');
 // Navigation / Multi-page DOM query
 const btnGoToBooth = document.getElementById('btnGoToBooth');
 const btnBackToSetup = document.getElementById('btnBackToSetup');
+const mirrorToggle = document.getElementById('mirrorToggle');
+const stickerOffsetInput = document.getElementById('stickerOffsetInput');
+const stickerOffsetValue = document.getElementById('stickerOffsetValue');
 const appContainer = document.querySelector('.app-container');
 
 const ctx = canvas.getContext('2d');
@@ -58,6 +61,8 @@ let activeTemplate = 'polaroid';
 let activeLayout = 'four-cuts';
 let activeFilter = 'normal';
 let activeSticker = 'none';
+let isMirrored = true;      // Camera horizontal mirroring toggle
+let stickerYOffset = 0;     // Custom emoji height slider offset value
 let countdownInterval = null;
 let stream = null;
 let photosTaken = []; // Array of offscreen canvases holding intermediate shots
@@ -112,6 +117,7 @@ async function initCamera() {
       audio: false 
     });
     video.srcObject = stream;
+    video.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
     statusBadge.textContent = "Ready to shoot";
     isDemoMode = false;
   } catch (e) {
@@ -194,7 +200,28 @@ stickerCards.forEach(card => {
     }
   });
 });
+// Bind Camera Mirroring Toggle
+mirrorToggle.addEventListener('change', (e) => {
+  isMirrored = e.target.checked;
+  video.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+});
 
+// Bind Sticker Height offset adjustment slider
+stickerOffsetInput.addEventListener('input', (e) => {
+  stickerYOffset = parseInt(e.target.value, 10);
+  if (stickerYOffset === 0) {
+    stickerOffsetValue.textContent = "Pas Kepala (0)";
+  } else if (stickerYOffset < 0) {
+    stickerOffsetValue.textContent = `Naik ↑ (${Math.abs(stickerYOffset)})`;
+  } else {
+    stickerOffsetValue.textContent = `Turun ↓ (${stickerYOffset})`;
+  }
+  
+  // Re-render final layout in real time to show visual shifts
+  if (photosTaken.length > 0) {
+    renderFinalLayout();
+  }
+});
 // Halaman 1 -> Halaman 2 transition: Lanjut ke Booth Studio
 btnGoToBooth.addEventListener('click', () => {
   appContainer.classList.add('show-booth');
@@ -370,7 +397,14 @@ function grabVideoFrame() {
   // Store high resolution raw frame matching input video dimensions
   offscreen.width = video.videoWidth || 1280;
   offscreen.height = video.videoHeight || 720;
+  
+  oCtx.save();
+  if (isMirrored) {
+    oCtx.translate(offscreen.width, 0);
+    oCtx.scale(-1, 1);
+  }
   oCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+  oCtx.restore();
   return offscreen;
 }
 
@@ -438,52 +472,64 @@ function drawStickersToSlot(x, y, w, h) {
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
 
+  // SPEKTRA ROTATION TILT: If activeTemplate is 'retro-pop', let the emoji match the photo slot tilt!
+  if (activeTemplate === 'retro-pop') {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    ctx.translate(cx, cy);
+    const rotateRad = (x < canvas.width / 2) ? -0.06 : 0.06;
+    ctx.rotate(rotateRad);
+    // Draw relative to translated center
+    x = -w / 2;
+    y = -h / 2;
+  }
+
   if (activeSticker === 'cat') {
-    // Cute Cat Ears Dekorasii
-    ctx.fillText('🐱', x + w / 2, y + 25);
+    // Cute Cat Ears Dekorasii on top of head!
+    ctx.fillText('🐱', x + w / 2, y + h * 0.22 + stickerYOffset);
     ctx.font = '22px "Segoe UI Emoji"';
     ctx.fillText('🌸', x + 25, y + h - 25);
     ctx.fillText('🌸', x + w - 25, y + h - 25);
 
   } else if (activeSticker === 'crown') {
-    // Golden crown floating
-    ctx.fillText('👑', x + w / 2, y + 25);
+    // Golden crown floating perfectly on top of head!
+    ctx.fillText('👑', x + w / 2, y + h * 0.20 + stickerYOffset);
     ctx.font = '20px "Segoe UI Emoji"';
-    ctx.fillText('✨', x + w / 2 - 35, y + 35);
-    ctx.fillText('✨', x + w / 2 + 35, y + 35);
+    ctx.fillText('✨', x + w / 2 - 35, y + h * 0.20 + 10 + stickerYOffset);
+    ctx.fillText('✨', x + w / 2 + 35, y + h * 0.20 + 10 + stickerYOffset);
 
   } else if (activeSticker === 'sparkles') {
     // Magic glowing sparkles
     ctx.font = '28px "Segoe UI Emoji"';
-    ctx.fillText('✨', x + 25, y + 25);
+    ctx.fillText('✨', x + 25, y + h * 0.20 + stickerYOffset);
     ctx.fillText('✨', x + w - 25, y + h - 25);
-    ctx.fillText('💫', x + w - 28, y + 30);
+    ctx.fillText('💫', x + w - 28, y + h * 0.22 + stickerYOffset);
     ctx.fillText('🌟', x + 28, y + h - 30);
 
   } else if (activeSticker === 'glasses') {
-    // Funny retro cool shades worn in face area
+    // Funny retro cool shades worn exactly on the eyes/face!
     ctx.font = '42px "Segoe UI Emoji"';
-    ctx.fillText('🕶️', x + w / 2, y + h * 0.45);
+    ctx.fillText('🕶️', x + w / 2, y + h * 0.38 + stickerYOffset);
 
   } else if (activeSticker === 'hearts') {
-    // Lovely hearts
+    // Lovely hearts floating on head
     ctx.font = '28px "Segoe UI Emoji"';
-    ctx.fillText('💖', x + 25, y + 25);
-    ctx.fillText('💝', x + w - 25, y + 25);
+    ctx.fillText('💖', x + 25, y + h * 0.20 + stickerYOffset);
+    ctx.fillText('💝', x + w - 25, y + h * 0.20 + stickerYOffset);
     ctx.fillText('💕', x + w / 2, y + h - 30);
 
   } else if (activeSticker === 'devil') {
-    // Cute little devil
-    ctx.fillText('😈', x + w / 2, y + 25);
+    // Cute little devil horns sitting on top of head!
+    ctx.fillText('😈', x + w / 2, y + h * 0.20 + stickerYOffset);
     ctx.font = '22px "Segoe UI Emoji"';
     ctx.fillText('🔥', x + 25, y + h - 25);
     ctx.fillText('🔥', x + w - 25, y + h - 25);
 
   } else if (activeSticker === 'blush') {
-    // Blushing sweet face cheeks
+    // Blushing sweet face cheeks aligned with face height!
     ctx.font = '30px "Segoe UI Emoji"';
-    ctx.fillText('😊', x + 35, y + h - 35);
-    ctx.fillText('😊', x + w - 35, y + h - 35);
+    ctx.fillText('😊', x + w/2 - 50, y + h * 0.40 + stickerYOffset);
+    ctx.fillText('😊', x + w/2 + 50, y + h * 0.40 + stickerYOffset);
   }
 
   ctx.restore();
@@ -808,12 +854,80 @@ function drawInnerFrameOutline(x, y, w, h) {
   ctx.restore();
 }
 
+let cachedPaperTexture = null;
+let lastPaperWidth = 0;
+let lastPaperHeight = 0;
+
+// Generates an incredibly realistic, warm newsprint cream recycled paper texture with fibers & grain noise
+function getPaperTexture(width, height) {
+  if (cachedPaperTexture && lastPaperWidth === width && lastPaperHeight === height) {
+    return cachedPaperTexture;
+  }
+  
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = width;
+  tempCanvas.height = height;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  // Base premium warm newsprint color
+  tempCtx.fillStyle = '#f5f0e3'; // Warm organic recycled newsprint
+  tempCtx.fillRect(0, 0, width, height);
+  
+  // 1. Draw delicate paper wood fibers
+  tempCtx.strokeStyle = 'rgba(110, 95, 75, 0.05)';
+  tempCtx.lineWidth = 0.8;
+  for (let i = 0; i < 350; i++) {
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    const len = 4 + Math.random() * 8;
+    const angle = Math.random() * Math.PI * 2;
+    tempCtx.beginPath();
+    tempCtx.moveTo(x, y);
+    tempCtx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+    tempCtx.stroke();
+  }
+  
+  // 2. Draw organic grain noise (specks)
+  try {
+    const imgData = tempCtx.getImageData(0, 0, width, height);
+    const data = imgData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const noise = (Math.random() - 0.5) * 6; // Soft organic contrast variation
+      data[i] = Math.min(255, Math.max(0, data[i] + noise));
+      data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+      data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+    }
+    tempCtx.putImageData(imgData, 0, 0);
+  } catch (e) {
+    console.warn("ImageData block due to local CORS. Falling back to soft grain simulation.");
+  }
+  
+  // 3. Draw soft, organic crinkle paper ridges using linear gradients
+  for (let i = 0; i < 5; i++) {
+    const grad = tempCtx.createLinearGradient(
+      Math.random() * width, 
+      0, 
+      Math.random() * width, 
+      height
+    );
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.03)');
+    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.03)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0.03)');
+    tempCtx.fillStyle = grad;
+    tempCtx.fillRect(0, 0, width, height);
+  }
+  
+  cachedPaperTexture = tempCanvas;
+  lastPaperWidth = width;
+  lastPaperHeight = height;
+  return tempCanvas;
+}
+
 // Background fills for frame templates
 function drawTemplateBackground() {
   if (activeLayout === 'newspaper-poetic' || activeTemplate === 'newspaper') {
-    // Retro Newsprint Cream
-    ctx.fillStyle = '#fdfaf2';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const paper = getPaperTexture(canvas.width, canvas.height);
+    ctx.drawImage(paper, 0, 0);
     return;
   }
 

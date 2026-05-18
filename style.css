@@ -1,5 +1,5 @@
 /* Import modern aesthetic fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Satisfy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Satisfy&display=swap');
 
 :root {
   --bg-dark: #0f0f1b;
@@ -999,4 +999,118 @@ body:has(.show-booth) {
   .main-booth h1 {
     font-size: 1.8rem;
   }
+}
+
+/* Mirror Toggle Switch & Slider styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .4s;
+  border-radius: 34px;
+  border: 1px solid var(--border-glass);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background-color: var(--accent-pink);
+  border-color: rgba(236, 72, 153, 0.3);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Elegant Range Slider styling */
+.height-control-wrapper {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-glass);
+  padding: 0.8rem 1.2rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.height-control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.height-control-header span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.height-value {
+  font-size: 0.8rem;
+  color: var(--accent-pink);
+  font-weight: 800;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  border: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--accent-pink);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -6px;
+  box-shadow: 0 0 8px var(--accent-pink);
+  transition: transform 0.1s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
