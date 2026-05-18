@@ -336,7 +336,6 @@ function drawStickersToSlot(x, y, w, h) {
 
   ctx.restore();
 }
-}
 
 // Combines all captured poses onto the final Canvas with frame background and overlays
 function renderFinalLayout() {
