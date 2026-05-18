@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photobooth Experience</title>
+    <meta name="description" content="A sleek web‑based photobooth that captures images from your webcam and lets you download the result instantly." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Photobooth</h1>
+        <div class="camera-wrapper">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" width="640" height="480"></canvas>
+        </div>
+        <div class="controls">
+            <button id="captureBtn" class="btn primary">Capture</button>
+            <a id="downloadLink" class="btn secondary" download="photo.png" style="display:none;">Download</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
