@@ -753,7 +753,33 @@ video.filter-vivid { filter: saturate(1.6) contrast(1.1); }
   display: none !important; /* Hidden on Page 1 */
 }
 
-/* Page 2 Active State styling */
+/* Page 2 Active State styling (FULL IMMERSIVE SCREEN MODE!) */
+body:has(.show-booth) {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.app-container.show-booth {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border-radius: 0;
+  border: none;
+  background: radial-gradient(circle at center, #150f2e 0%, #07070d 100%);
+  padding: 1.5rem 2rem;
+  box-shadow: none;
+  margin: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
 .app-container.show-booth .sidebar {
   display: none !important;
 }
@@ -762,15 +788,55 @@ video.filter-vivid { filter: saturate(1.6) contrast(1.1); }
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  max-width: 800px;
+  height: 100%;
+  max-width: 900px;
   margin: 0 auto;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* Spreads elements out beautifully */
+}
+
+.app-container.show-booth .main-booth header {
+  margin-bottom: 0.2rem;
+  text-align: center;
+}
+
+.app-container.show-booth .main-booth header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.1rem;
+  background: linear-gradient(135deg, #f43f5e 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+.app-container.show-booth .main-booth header p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
 }
 
 .app-container.show-booth .booth-container {
-  max-width: 500px; /* Make the camera feed MUCH LARGER on the full page! */
+  max-width: 580px; /* Massive, sharp camera feed display! */
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.app-container.show-booth .camera-wrapper {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 25px rgba(139, 92, 246, 0.15);
+}
+
+.app-container.show-booth .controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0.8rem;
+  margin-bottom: 0.2rem;
 }
 
 /* Setup Header styling */
