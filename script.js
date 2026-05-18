@@ -15,6 +15,11 @@ const layoutCards = document.querySelectorAll('.layout-card');
 const filterCards = document.querySelectorAll('.filter-card');
 const stickerCards = document.querySelectorAll('.sticker-card');
 
+// Navigation / Multi-page DOM query
+const btnGoToBooth = document.getElementById('btnGoToBooth');
+const btnBackToSetup = document.getElementById('btnBackToSetup');
+const appContainer = document.querySelector('.app-container');
+
 const ctx = canvas.getContext('2d');
 
 // Configurations
@@ -43,7 +48,8 @@ const LAYOUTS = {
   'trio-combo': { photosNeeded: 3, width: 600, height: 850 },       // 1 Big, 2 Small
   'grid-2x2-wide': { photosNeeded: 4, width: 640, height: 820 },   // 2x2 Landscape
   'trio-portrait': { photosNeeded: 3, width: 360, height: 880 },   // 3 square slots stacked
-  'double-strip-3': { photosNeeded: 6, width: 640, height: 950 }   // 2 strips of 3 side-by-side
+  'double-strip-3': { photosNeeded: 6, width: 640, height: 950 },  // 2 strips of 3 side-by-side
+  'newspaper-poetic': { photosNeeded: 3, width: 600, height: 1150 } // Poetic news page layout
 };
 
 // Expanded Pose Recommendations for up to 6 poses
@@ -156,6 +162,19 @@ stickerCards.forEach(card => {
       renderFinalLayout();
     }
   });
+});
+
+// Halaman 1 -> Halaman 2 transition: Lanjut ke Booth Studio
+btnGoToBooth.addEventListener('click', () => {
+  appContainer.classList.add('show-booth');
+  // Auto-scroll screen to top for nice immersive view
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Halaman 2 -> Halaman 1 transition: Kembali ke Pengaturan Setup
+btnBackToSetup.addEventListener('click', () => {
+  appContainer.classList.remove('show-booth');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // Start sequential capture based on active layout limits
@@ -629,6 +648,79 @@ function renderFinalLayout() {
         drawInnerFrameOutline(targetX, targetY, slotWidth, slotHeight);
       }
     }
+  } else if (activeLayout === 'newspaper-poetic') {
+    // Newspaper Poetic: 1 Big + 2 Small with interspersed poetry columns!
+    const border = borderOffset;
+    const mainW = canvas.width - (border * 2);
+    const mainH = 340;
+    
+    // Top Main Photo
+    const mainY = 135; // Leave space at top for newspaper header!
+    if (photosTaken[0]) {
+      drawPhotoToSlot(photosTaken[0], border, mainY, mainW, mainH);
+    }
+    drawInnerFrameOutline(border, mainY, mainW, mainH);
+    
+    // Second Photo (Middle Right)
+    const midPhotoW = 266;
+    const midPhotoH = 180;
+    const midPhotoX = canvas.width - border - midPhotoW;
+    const midPhotoY = mainY + mainH + 30;
+    if (photosTaken[1]) {
+      drawPhotoToSlot(photosTaken[1], midPhotoX, midPhotoY, midPhotoW, midPhotoH);
+    }
+    drawInnerFrameOutline(midPhotoX, midPhotoY, midPhotoW, midPhotoH);
+    
+    // Third Photo (Bottom Left)
+    const botPhotoW = 266;
+    const botPhotoH = 180;
+    const botPhotoX = border;
+    const botPhotoY = midPhotoY + midPhotoH + 30;
+    if (photosTaken[2]) {
+      drawPhotoToSlot(photosTaken[2], botPhotoX, botPhotoY, botPhotoW, botPhotoH);
+    }
+    drawInnerFrameOutline(botPhotoX, botPhotoY, botPhotoW, botPhotoH);
+    
+    // Draw Poetry Column 1 (Middle Left, next to Photo 2)
+    ctx.save();
+    ctx.fillStyle = '#111111';
+    ctx.font = '14px "Georgia", serif, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    
+    const poetryLineHeight = 22;
+    const poetry1X = border + 5;
+    const poetry1Y = midPhotoY + 5;
+    const poetryLines1 = [
+      "Metro bukan hanya sekadar",
+      "kota,",
+      "Ia adalah cerita dalam tiap",
+      "langkah kita.",
+      "Di tiap sudutnya, rindu",
+      "berbisik pelan,",
+      "Seolah hati selalu ingin",
+      "pulang."
+    ];
+    poetryLines1.forEach((line, idx) => {
+      ctx.fillText(line, poetry1X, poetry1Y + (idx * poetryLineHeight));
+    });
+    
+    // Draw Poetry Column 2 (Bottom Right, next to Photo 3)
+    const poetry2X = midPhotoX + 5;
+    const poetry2Y = botPhotoY + 5;
+    const poetryLines2 = [
+      "Senyum ramah menyapa tanpa",
+      "alasan,",
+      "Hangat terasa di setiap",
+      "pertemuan.",
+      "Di sini waktu berjalan perlahan,",
+      "Membiarkan cinta tumbuh",
+      "berkesan ✨"
+    ];
+    poetryLines2.forEach((line, idx) => {
+      ctx.fillText(line, poetry2X, poetry2Y + (idx * poetryLineHeight));
+    });
+    ctx.restore();
   }
 
   // 3. Draw Watermark, captions, logos at bottom
@@ -898,22 +990,69 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     // Newspaper border styling (vintage cream and black ink lines)
     ctx.save();
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
-    // Draw horizontal separator line above bottom panel
-    ctx.beginPath();
-    ctx.moveTo(margin, canvas.height - bottomOffset + 10);
-    ctx.lineTo(canvas.width - margin, canvas.height - bottomOffset + 10);
-    ctx.stroke();
+    
+    if (activeLayout === 'newspaper-poetic') {
+      // 1. Draw top headline
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 36px "Georgia", serif, sans-serif';
+      ctx.textAlign = 'center';
+      
+      const headlineText = caption.toUpperCase() || "KOTA METRO HARI INI";
+      ctx.fillText(headlineText, canvas.width / 2, 70);
+      
+      // 2. Draw sub-headline texts
+      ctx.font = 'bold 13px "Georgia", serif, sans-serif';
+      ctx.fillStyle = '#222222';
+      
+      // Left side: month & year
+      ctx.textAlign = 'left';
+      ctx.fillText("April 2026", margin, 105);
+      
+      // Right side: Edisi Terbatas
+      ctx.textAlign = 'right';
+      ctx.fillText("EDISI TERBATAS", canvas.width - margin, 105);
+      
+      // 3. Draw premium double black line separator
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(margin, 115);
+      ctx.lineTo(canvas.width - margin, 115);
+      ctx.stroke();
+      
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, 120);
+      ctx.lineTo(canvas.width - margin, 120);
+      ctx.stroke();
+      
+      // 4. Draw solid black bottom brand banner
+      const bannerY = canvas.height - 70;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(margin, bannerY, canvas.width - (margin * 2), 42);
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px "Georgia", serif, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText("@kalabooth", canvas.width / 2, bannerY + 21);
+      
+    } else {
+      // Keep standard layout footer for other newspaper layouts
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(margin, canvas.height - bottomOffset + 10);
+      ctx.lineTo(canvas.width - margin, canvas.height - bottomOffset + 10);
+      ctx.stroke();
 
-    // Newspaper Typography
-    ctx.fillStyle = '#111111';
-    ctx.font = 'bold 24px "Outfit", serif, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`🗞️ TRE DAILY PRESS: ${caption.toUpperCase() || "CLASSIC EDITION"}`, canvas.width / 2, textY);
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 24px "Outfit", serif, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`🗞️ TRE DAILY PRESS: ${caption.toUpperCase() || "CLASSIC EDITION"}`, canvas.width / 2, textY);
 
-    ctx.font = 'bold italic 12px serif';
-    ctx.fillStyle = '#555555';
-    ctx.fillText(`PUBLISHED ON ${dateTime} • PRICE: FREE`, canvas.width / 2, textY + 25);
+      ctx.font = 'bold italic 12px serif';
+      ctx.fillStyle = '#555555';
+      ctx.fillText(`PUBLISHED ON ${dateTime} • PRICE: FREE`, canvas.width / 2, textY + 25);
+    }
     ctx.restore();
 
   } else if (activeTemplate === 'matrix') {

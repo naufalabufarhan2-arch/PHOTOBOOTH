@@ -16,6 +16,11 @@
     <div class="app-container">
         <!-- Sidebar for Settings -->
         <aside class="sidebar">
+            <header class="setup-header">
+                <h1>🎨 SETUP STUDIO PHOTOBOOTH</h1>
+                <p>Tentukan pilihan Layout, Bingkai, Filter, dan Emoji lucu Anda sebelum memotret!</p>
+            </header>
+            
             <!-- 1. Layout Selector Section (12 Options) -->
             <div class="settings-section">
                 <h2>1. Choose Photo Layout</h2>
@@ -96,6 +101,13 @@
                             <div class="col"><span></span><span></span><span></span></div>
                         </div>
                         <span>Double 3-Strip</span>
+                    </button>
+                    <button class="layout-card" data-layout="newspaper-poetic">
+                        <div class="layout-icon newspaper-layout">
+                            <span class="big-top"></span>
+                            <div class="row-2"><span></span><span></span></div>
+                        </div>
+                        <span>Newspaper Poetic</span>
                     </button>
                 </div>
             </div>
@@ -234,11 +246,23 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Go to Booth CTA Button -->
+            <div class="booth-cta-wrapper">
+                <button id="btnGoToBooth" class="btn primary-btn large-btn full-width-btn">
+                    ✨ Lanjut Ambil Foto 📸
+                </button>
+            </div>
         </aside>
 
         <!-- Main Photobooth View -->
         <main class="main-booth">
             <header>
+                <div class="booth-top-bar">
+                    <button id="btnBackToSetup" class="btn neutral-btn back-btn">
+                        ⬅️ Edit Pengaturan (Halaman 1)
+                    </button>
+                </div>
                 <h1>📸 PHOTOBOOTH TRE-PAGI A</h1>
                 <p>Semangat pagi Teknologi Rekayasa Elektronika! Yuk abadikan momen kelasmu!</p>
             </header>
