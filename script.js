@@ -466,13 +466,17 @@ function renderFinalLayout() {
   const gap = 16;
   const needed = config.photosNeeded;
 
+  // Dynamic Shift Down if Newspaper template is active to prevent overlapping with newspaper header!
+  const isNewspaper = (activeTemplate === 'newspaper');
+  const topOffset = isNewspaper ? 135 : borderOffset;
+
   if (activeLayout === 'four-cuts' || activeLayout === 'three-cuts') {
     // Single Column vertical strip
     const slotWidth = canvas.width - (borderOffset * 2);
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - ((needed - 1) * gap)) / needed;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - ((needed - 1) * gap)) / needed;
 
     for (let i = 0; i < needed; i++) {
-      const targetY = borderOffset + i * (slotHeight + gap);
+      const targetY = topOffset + i * (slotHeight + gap);
       if (photosTaken[i]) {
         drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
       }
@@ -482,13 +486,13 @@ function renderFinalLayout() {
   } else if (activeLayout === 'grid-2x2') {
     // 2x2 grid slots
     const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - gap) / 2;
 
     const coordinates = [
-      { x: borderOffset, y: borderOffset },
-      { x: borderOffset + slotWidth + gap, y: borderOffset },
-      { x: borderOffset, y: borderOffset + slotHeight + gap },
-      { x: borderOffset + slotWidth + gap, y: borderOffset + slotHeight + gap }
+      { x: borderOffset, y: topOffset },
+      { x: borderOffset + slotWidth + gap, y: topOffset },
+      { x: borderOffset, y: topOffset + slotHeight + gap },
+      { x: borderOffset + slotWidth + gap, y: topOffset + slotHeight + gap }
     ];
 
     for (let i = 0; i < 4; i++) {
@@ -502,30 +506,30 @@ function renderFinalLayout() {
   } else if (activeLayout === 'single-shot') {
     // Single Polaroid
     const slotWidth = canvas.width - (borderOffset * 2);
-    const slotHeight = canvas.height - borderOffset - bottomOffset;
+    const slotHeight = canvas.height - topOffset - bottomOffset;
     if (photosTaken[0]) {
-      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, slotWidth, slotHeight);
+      drawPhotoToSlot(photosTaken[0], borderOffset, topOffset, slotWidth, slotHeight);
     }
-    drawInnerFrameOutline(borderOffset, borderOffset, slotWidth, slotHeight);
+    drawInnerFrameOutline(borderOffset, topOffset, slotWidth, slotHeight);
 
   } else if (activeLayout === 'combo-grid') {
     // 1 Big + 3 Small (4 photos)
     const bigWidth = canvas.width - (borderOffset * 2);
-    const bigHeight = (canvas.height - borderOffset - bottomOffset - gap) * 0.55;
+    const bigHeight = (canvas.height - topOffset - bottomOffset - gap) * 0.55;
     
     const smallWidth = (canvas.width - (borderOffset * 2) - (2 * gap)) / 3;
-    const smallHeight = canvas.height - borderOffset - bottomOffset - gap - bigHeight;
+    const smallHeight = canvas.height - topOffset - bottomOffset - gap - bigHeight;
 
     // Big Photo slot
     if (photosTaken[0]) {
-      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, bigWidth, bigHeight);
+      drawPhotoToSlot(photosTaken[0], borderOffset, topOffset, bigWidth, bigHeight);
     }
-    drawInnerFrameOutline(borderOffset, borderOffset, bigWidth, bigHeight);
+    drawInnerFrameOutline(borderOffset, topOffset, bigWidth, bigHeight);
 
     // Small photo slots
     for (let i = 0; i < 3; i++) {
       const targetX = borderOffset + i * (smallWidth + gap);
-      const targetY = borderOffset + bigHeight + gap;
+      const targetY = topOffset + bigHeight + gap;
       if (photosTaken[i + 1]) {
         drawPhotoToSlot(photosTaken[i + 1], targetX, targetY, smallWidth, smallHeight);
       }
@@ -535,13 +539,13 @@ function renderFinalLayout() {
   } else if (activeLayout === 'grid-2x3') {
     // 6 slots in a 2x3 Grid
     const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - (2 * gap)) / 3;
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 2; col++) {
         const i = row * 2 + col;
         const targetX = borderOffset + col * (slotWidth + gap);
-        const targetY = borderOffset + row * (slotHeight + gap);
+        const targetY = topOffset + row * (slotHeight + gap);
         if (photosTaken[i]) {
           drawPhotoToSlot(photosTaken[i], targetX, targetY, slotWidth, slotHeight);
         }
@@ -552,10 +556,10 @@ function renderFinalLayout() {
   } else if (activeLayout === 'double-landscape') {
     // 2 Wide Landscape Photos stacked vertically
     const slotWidth = canvas.width - (borderOffset * 2);
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - gap) / 2;
 
     for (let i = 0; i < 2; i++) {
-      const targetY = borderOffset + i * (slotHeight + gap);
+      const targetY = topOffset + i * (slotHeight + gap);
       if (photosTaken[i]) {
         drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
       }
@@ -565,10 +569,10 @@ function renderFinalLayout() {
   } else if (activeLayout === 'double-portrait') {
     // 2 Narrow Portrait Photos stacked vertically
     const slotWidth = canvas.width - (borderOffset * 2);
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - gap) / 2;
 
     for (let i = 0; i < 2; i++) {
-      const targetY = borderOffset + i * (slotHeight + gap);
+      const targetY = topOffset + i * (slotHeight + gap);
       if (photosTaken[i]) {
         drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
       }
@@ -578,21 +582,21 @@ function renderFinalLayout() {
   } else if (activeLayout === 'trio-combo') {
     // 1 Big + 2 Small (3 photos)
     const bigWidth = canvas.width - (borderOffset * 2);
-    const bigHeight = (canvas.height - borderOffset - bottomOffset - gap) * 0.55;
+    const bigHeight = (canvas.height - topOffset - bottomOffset - gap) * 0.55;
     
     const smallWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
-    const smallHeight = canvas.height - borderOffset - bottomOffset - gap - bigHeight;
+    const smallHeight = canvas.height - topOffset - bottomOffset - gap - bigHeight;
 
     // Big Photo slot
     if (photosTaken[0]) {
-      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, bigWidth, bigHeight);
+      drawPhotoToSlot(photosTaken[0], borderOffset, topOffset, bigWidth, bigHeight);
     }
-    drawInnerFrameOutline(borderOffset, borderOffset, bigWidth, bigHeight);
+    drawInnerFrameOutline(borderOffset, topOffset, bigWidth, bigHeight);
 
     // 2 Small slots
     for (let i = 0; i < 2; i++) {
       const targetX = borderOffset + i * (smallWidth + gap);
-      const targetY = borderOffset + bigHeight + gap;
+      const targetY = topOffset + bigHeight + gap;
       if (photosTaken[i + 1]) {
         drawPhotoToSlot(photosTaken[i + 1], targetX, targetY, smallWidth, smallHeight);
       }
@@ -602,13 +606,13 @@ function renderFinalLayout() {
   } else if (activeLayout === 'grid-2x2-wide') {
     // 2x2 Landscape grid
     const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - gap) / 2;
 
     const coordinates = [
-      { x: borderOffset, y: borderOffset },
-      { x: borderOffset + slotWidth + gap, y: borderOffset },
-      { x: borderOffset, y: borderOffset + slotHeight + gap },
-      { x: borderOffset + slotWidth + gap, y: borderOffset + slotHeight + gap }
+      { x: borderOffset, y: topOffset },
+      { x: borderOffset + slotWidth + gap, y: topOffset },
+      { x: borderOffset, y: topOffset + slotHeight + gap },
+      { x: borderOffset + slotWidth + gap, y: topOffset + slotHeight + gap }
     ];
 
     for (let i = 0; i < 4; i++) {
@@ -622,10 +626,10 @@ function renderFinalLayout() {
   } else if (activeLayout === 'trio-portrait') {
     // 3 Square slots stacked vertically
     const slotWidth = canvas.width - (borderOffset * 2);
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - (2 * gap)) / 3;
 
     for (let i = 0; i < 3; i++) {
-      const targetY = borderOffset + i * (slotHeight + gap);
+      const targetY = topOffset + i * (slotHeight + gap);
       if (photosTaken[i]) {
         drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
       }
@@ -635,13 +639,13 @@ function renderFinalLayout() {
   } else if (activeLayout === 'double-strip-3') {
     // 2 strips of 3 side-by-side (6 Poses)
     const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
-    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+    const slotHeight = (canvas.height - topOffset - bottomOffset - (2 * gap)) / 3;
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 2; col++) {
         const i = col * 3 + row; // Column-major indexing for dual strips
         const targetX = borderOffset + col * (slotWidth + gap);
-        const targetY = borderOffset + row * (slotHeight + gap);
+        const targetY = topOffset + row * (slotHeight + gap);
         if (photosTaken[i]) {
           drawPhotoToSlot(photosTaken[i], targetX, targetY, slotWidth, slotHeight);
         }
@@ -684,7 +688,7 @@ function renderFinalLayout() {
     // Draw Poetry Column 1 (Middle Left, next to Photo 2)
     ctx.save();
     ctx.fillStyle = '#111111';
-    ctx.font = '14px "Georgia", serif, sans-serif';
+    ctx.font = 'italic 14px "Playfair Display", "Georgia", serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     
@@ -991,68 +995,50 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.save();
     ctx.strokeStyle = '#000000';
     
-    if (activeLayout === 'newspaper-poetic') {
-      // 1. Draw top headline
-      ctx.fillStyle = '#111111';
-      ctx.font = 'bold 36px "Georgia", serif, sans-serif';
-      ctx.textAlign = 'center';
-      
-      const headlineText = caption.toUpperCase() || "KOTA METRO HARI INI";
-      ctx.fillText(headlineText, canvas.width / 2, 70);
-      
-      // 2. Draw sub-headline texts
-      ctx.font = 'bold 13px "Georgia", serif, sans-serif';
-      ctx.fillStyle = '#222222';
-      
-      // Left side: month & year
-      ctx.textAlign = 'left';
-      ctx.fillText("April 2026", margin, 105);
-      
-      // Right side: Edisi Terbatas
-      ctx.textAlign = 'right';
-      ctx.fillText("EDISI TERBATAS", canvas.width - margin, 105);
-      
-      // 3. Draw premium double black line separator
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(margin, 115);
-      ctx.lineTo(canvas.width - margin, 115);
-      ctx.stroke();
-      
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(margin, 120);
-      ctx.lineTo(canvas.width - margin, 120);
-      ctx.stroke();
-      
-      // 4. Draw solid black bottom brand banner
-      const bannerY = canvas.height - 70;
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(margin, bannerY, canvas.width - (margin * 2), 42);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 14px "Georgia", serif, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText("@kalabooth", canvas.width / 2, bannerY + 21);
-      
-    } else {
-      // Keep standard layout footer for other newspaper layouts
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(margin, canvas.height - bottomOffset + 10);
-      ctx.lineTo(canvas.width - margin, canvas.height - bottomOffset + 10);
-      ctx.stroke();
-
-      ctx.fillStyle = '#111111';
-      ctx.font = 'bold 24px "Outfit", serif, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`🗞️ TRE DAILY PRESS: ${caption.toUpperCase() || "CLASSIC EDITION"}`, canvas.width / 2, textY);
-
-      ctx.font = 'bold italic 12px serif';
-      ctx.fillStyle = '#555555';
-      ctx.fillText(`PUBLISHED ON ${dateTime} • PRICE: FREE`, canvas.width / 2, textY + 25);
-    }
+    // 1. Draw top headline
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 36px "Playfair Display", "Georgia", serif';
+    ctx.textAlign = 'center';
+    
+    const headlineText = caption.toUpperCase() || "KOTA METRO HARI INI";
+    ctx.fillText(headlineText, canvas.width / 2, 70);
+    
+    // 2. Draw sub-headline texts
+    ctx.font = 'bold 13px "Playfair Display", "Georgia", serif';
+    ctx.fillStyle = '#222222';
+    
+    // Left side: month & year
+    ctx.textAlign = 'left';
+    ctx.fillText("April 2026", margin, 105);
+    
+    // Right side: Edisi Terbatas
+    ctx.textAlign = 'right';
+    ctx.fillText("EDISI TERBATAS", canvas.width - margin, 105);
+    
+    // 3. Draw premium double black line separator
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(margin, 115);
+    ctx.lineTo(canvas.width - margin, 115);
+    ctx.stroke();
+    
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin, 120);
+    ctx.lineTo(canvas.width - margin, 120);
+    ctx.stroke();
+    
+    // 4. Draw solid black bottom brand banner
+    const bannerY = canvas.height - 70;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(margin, bannerY, canvas.width - (margin * 2), 42);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px "Playfair Display", "Georgia", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("@kalabooth", canvas.width / 2, bannerY + 21);
+    
     ctx.restore();
 
   } else if (activeTemplate === 'matrix') {
@@ -1157,6 +1143,12 @@ function resetPhoto() {
 // Event bindings
 captureBtn.addEventListener('click', startCaptureSequence);
 resetBtn.addEventListener('click', resetPhoto);
+captionInput.addEventListener('input', () => {
+  if (photosTaken.length > 0) {
+    renderFinalLayout();
+  }
+});
+
 window.addEventListener('load', () => {
   initCamera();
   // Set default canvas size

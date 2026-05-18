@@ -789,7 +789,7 @@ body:has(.show-booth) {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  max-width: 900px;
+  max-width: 100vw; /* Spans 100% of tablet width! */
   margin: 0 auto;
   align-items: center;
   justify-content: space-between; /* Spreads elements out beautifully */
@@ -815,8 +815,8 @@ body:has(.show-booth) {
 }
 
 .app-container.show-booth .booth-container {
-  max-width: 580px; /* Massive, sharp camera feed display! */
-  width: 100%;
+  max-width: 80vh; /* Dynamically scaled to tablet/laptop screen height for giant viewport display! */
+  width: 92%;
   flex: 1;
   display: flex;
   flex-direction: column;
