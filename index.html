@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mall-Style Photobooth</title>
-    <meta name="description" content="Premium mall-style photobooth with decorative frame templates and a countdown timer." />
+    <title>Premium Mall-Style Photobooth</title>
+    <meta name="description" content="Mall-style photobooth with multiple grid layouts, decorative frame templates, and countdown timer." />
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,39 +14,76 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar for Template Settings -->
+        <!-- Sidebar for Settings -->
         <aside class="sidebar">
-            <h2>Select Frame Template</h2>
-            <div class="template-selector">
-                <button class="template-card active" data-template="polaroid">
-                    <div class="template-preview polaroid"></div>
-                    <span>Classic Polaroid</span>
-                </button>
-                <button class="template-card" data-template="pastel">
-                    <div class="template-preview pastel"></div>
-                    <span>Sweet Pastel</span>
-                </button>
-                <button class="template-card" data-template="cyberpunk">
-                    <div class="template-preview cyberpunk"></div>
-                    <span>Neon Cyberpunk</span>
-                </button>
-                <button class="template-card" data-template="minimalist">
-                    <div class="template-preview minimalist"></div>
-                    <span>Elegant Minimal</span>
-                </button>
+            <!-- 1. Layout Selector Section -->
+            <div class="settings-section">
+                <h2>1. Choose Photo Layout</h2>
+                <div class="layout-selector">
+                    <button class="layout-card active" data-layout="four-cuts">
+                        <div class="layout-icon strip-4">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <span>4-Cuts Strip</span>
+                    </button>
+                    <button class="layout-card" data-layout="grid-2x2">
+                        <div class="layout-icon grid-4">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <span>2x2 Classic Grid</span>
+                    </button>
+                    <button class="layout-card" data-layout="three-cuts">
+                        <div class="layout-icon strip-3">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span>3-Cuts Strip</span>
+                    </button>
+                    <button class="layout-card" data-layout="single-shot">
+                        <div class="layout-icon single-1">
+                            <span></span>
+                        </div>
+                        <span>Single Portrait</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Frame Design Selector Section -->
+            <div class="settings-section">
+                <h2>2. Select Frame Design</h2>
+                <div class="template-selector">
+                    <button class="template-card active" data-template="polaroid">
+                        <div class="template-preview polaroid"></div>
+                        <span>Classic Polaroid</span>
+                    </button>
+                    <button class="template-card" data-template="pastel">
+                        <div class="template-preview pastel"></div>
+                        <span>Sweet Pastel</span>
+                    </button>
+                    <button class="template-card" data-template="cyberpunk">
+                        <div class="template-preview cyberpunk"></div>
+                        <span>Neon Cyberpunk</span>
+                    </button>
+                    <button class="template-card" data-template="minimalist">
+                        <div class="template-preview minimalist"></div>
+                        <span>Elegant Minimal</span>
+                    </button>
+                </div>
             </div>
             
-            <div class="customization">
-                <h3>Custom Caption</h3>
-                <input type="text" id="captionInput" placeholder="Add custom text..." maxlength="20" />
+            <!-- 3. Caption Customization Section -->
+            <div class="settings-section">
+                <h2>3. Custom Caption</h2>
+                <div class="customization">
+                    <input type="text" id="captionInput" placeholder="Add custom text..." maxlength="20" />
+                </div>
             </div>
         </aside>
 
         <!-- Main Photobooth View -->
         <main class="main-booth">
             <header>
-                <h1>📸 Retro Mall Photobooth</h1>
-                <p>Pick a template, customize your caption, and strike a pose!</p>
+                <h1>📸 Mall Photo Strip Creator</h1>
+                <p>Pick a layout, select a theme frame, custom caption, and pose!</p>
             </header>
 
             <div class="booth-container">
@@ -56,18 +93,21 @@
                     <video id="video" autoplay playsinline></video>
                     
                     <!-- Captured Canvas (Hidden/Displayed programmatically) -->
-                    <canvas id="canvas" width="600" height="750"></canvas>
+                    <canvas id="canvas"></canvas>
                     
                     <!-- Countdown Overlay -->
                     <div id="countdownOverlay" class="countdown-overlay hidden">
-                        <span id="countdownText">3</span>
+                        <div class="countdown-content">
+                            <span id="poseIndicator" class="pose-indicator">POSE 1 OF 4</span>
+                            <span id="countdownText">3</span>
+                        </div>
                     </div>
 
                     <!-- Camera Flash Effect -->
                     <div id="flashOverlay" class="flash-overlay"></div>
                 </div>
 
-                <!-- Custom Info Badge (Dynamic watermark preview) -->
+                <!-- Custom Info Badge (Dynamic status display) -->
                 <div id="statusBadge" class="status-badge">Ready to Shoot</div>
             </div>
 
@@ -79,8 +119,8 @@
                 <button id="resetBtn" class="btn neutral-btn hidden">
                     <span class="icon">🔄</span> Take Another
                 </button>
-                <a id="downloadLink" class="btn success-btn hidden" download="my_photobooth_photo.png">
-                    <span class="icon">💾</span> Save Photo
+                <a id="downloadLink" class="btn success-btn hidden" download="my_photostrip.png">
+                    <span class="icon">💾</span> Save Strip
                 </a>
             </div>
         </main>
