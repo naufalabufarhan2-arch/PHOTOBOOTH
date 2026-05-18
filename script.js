@@ -25,6 +25,7 @@ let activeSticker = 'none';
 let countdownInterval = null;
 let stream = null;
 let photosTaken = []; // Array of offscreen canvases holding intermediate shots
+let isDemoMode = false;
 
 // Layout definitions (Dynamic canvas sizes)
 const LAYOUTS = {
@@ -55,9 +56,16 @@ const POSE_IDEAS = [
   "Pose 6: Peace Sign! ✌️"
 ];
 
-// Initialize camera
+// Initialize camera with automatic Demo Fallback for local files & blocked permissions
 async function initCamera() {
   try {
+    // If raw local file is detected, browser blocks webcam by default due to Chromium sandbox rules
+    if (window.location.protocol === 'file:') {
+      console.warn("Raw local file protocol detected. Activating Premium Demo Fallback Mode.");
+      enableDemoMode("DEMO MODE (Local File Fallback)");
+      return;
+    }
+
     stream = await navigator.mediaDevices.getUserMedia({ 
       video: { 
         width: { ideal: 1280 },
@@ -68,10 +76,24 @@ async function initCamera() {
     });
     video.srcObject = stream;
     statusBadge.textContent = "Ready to shoot";
+    isDemoMode = false;
   } catch (e) {
-    statusBadge.textContent = "Camera Error";
-    alert('Could not access your camera. Please make sure to grant camera permissions.');
-    console.error(e);
+    console.error("Camera access failed, falling back to Demo Mode:", e);
+    enableDemoMode("DEMO MODE (Webcam Blocked)");
+  }
+}
+
+// Activates highly graphical, automated simulated pose generator
+function enableDemoMode(statusText) {
+  isDemoMode = true;
+  statusBadge.textContent = statusText;
+  statusBadge.style.color = '#fbbf24'; // Golden warning
+  
+  // Hide live video feed and activate beautiful custom animated wrapper
+  video.style.display = 'none';
+  const wrapper = document.querySelector('.camera-wrapper');
+  if (wrapper) {
+    wrapper.classList.add('demo-active');
   }
 }
 
@@ -222,15 +244,82 @@ function triggerCameraFlash(callback) {
   }, 100);
 }
 
-// Grabs and stores high-resolution raw camera frame
+// Grabs and stores high-resolution raw camera frame (with procedural generator for Demo Fallback)
 function grabVideoFrame() {
   const offscreen = document.createElement('canvas');
   const oCtx = offscreen.getContext('2d');
   
+  if (isDemoMode) {
+    // Generate an incredibly premium, cute stylized avatar frame!
+    offscreen.width = 640;
+    offscreen.height = 480;
+    
+    // 1. Beautiful vibrant linear gradient background based on photo index
+    const count = photosTaken.length;
+    const grads = [
+      ['#f43f5e', '#ec4899'], // Red-Pink
+      ['#3b82f6', '#06b6d4'], // Blue-Cyan
+      ['#10b981', '#34d399'], // Green
+      ['#8b5cf6', '#a78bfa'], // Purple
+      ['#f59e0b', '#fbbf24'], // Orange-Gold
+      ['#6366f1', '#a855f7']  // Indigo-Purple
+    ];
+    const activeGrad = grads[count % grads.length];
+    
+    const g = oCtx.createLinearGradient(0, 0, 640, 480);
+    g.addColorStop(0, activeGrad[0]);
+    g.addColorStop(1, activeGrad[1]);
+    oCtx.fillStyle = g;
+    oCtx.fillRect(0, 0, 640, 480);
+    
+    // 2. Draw modern vector smiley mascot character
+    oCtx.save();
+    oCtx.shadowColor = 'rgba(0,0,0,0.3)';
+    oCtx.shadowBlur = 10;
+    
+    // Avatar Body
+    oCtx.fillStyle = '#ffffff';
+    oCtx.beginPath();
+    oCtx.arc(320, 240, 90, 0, 2 * Math.PI);
+    oCtx.fill();
+    
+    // Cute blush cheeks
+    oCtx.fillStyle = '#fca5a5';
+    oCtx.beginPath();
+    oCtx.arc(260, 255, 14, 0, 2 * Math.PI);
+    oCtx.arc(380, 255, 14, 0, 2 * Math.PI);
+    oCtx.fill();
+    
+    // Eyes
+    oCtx.fillStyle = '#1e293b';
+    oCtx.beginPath();
+    oCtx.arc(270, 230, 8, 0, 2 * Math.PI);
+    oCtx.arc(370, 230, 8, 0, 2 * Math.PI);
+    oCtx.fill();
+    
+    // Cute smile
+    oCtx.strokeStyle = '#1e293b';
+    oCtx.lineWidth = 6;
+    oCtx.lineCap = 'round';
+    oCtx.beginPath();
+    oCtx.arc(320, 250, 40, 0, Math.PI); // Half circle smile
+    oCtx.stroke();
+    
+    // Bottom banner tag
+    oCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    oCtx.fillRect(0, 400, 640, 80);
+    oCtx.fillStyle = '#ffffff';
+    oCtx.font = 'bold 22px monospace';
+    oCtx.textAlign = 'center';
+    oCtx.fillText(`TRE-PAGI A • POSE RECOMMENDED: POSE ${count + 1}`, 320, 445);
+    
+    oCtx.restore();
+    return offscreen;
+  }
+  
   // Store high resolution raw frame matching input video dimensions
   offscreen.width = video.videoWidth || 1280;
   offscreen.height = video.videoHeight || 720;
-  
   oCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
   return offscreen;
 }

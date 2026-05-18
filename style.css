@@ -453,6 +453,29 @@ body {
   background: #000;
 }
 
+/* Smart Demo Mode Fallback styling */
+.camera-wrapper.demo-active {
+  background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.camera-wrapper.demo-active::after {
+  content: "✨ SMART DEMO MODE ACTIVE ✨\n(Using Cute Face Avatar Fallback)";
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: #c084fc;
+  white-space: pre-line;
+  line-height: 1.6;
+  padding: 1rem;
+  animation: pulseBadge 1.5s infinite alternate;
+}
+
 video {
   position: absolute;
   top: 0;
