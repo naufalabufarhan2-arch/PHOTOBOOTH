@@ -22,7 +22,7 @@
             </header>
             
             <!-- 1. Layout Selector Section (12 Options) -->
-            <div class="settings-section">
+            <div class="settings-section" id="section-layout">
                 <h2>1. Choose Photo Layout</h2>
                 <div class="layout-selector">
                     <button class="layout-card active" data-layout="four-cuts">
@@ -113,7 +113,7 @@
             </div>
 
             <!-- 2. Frame Design Selector Section (12 Options) -->
-            <div class="settings-section">
+            <div class="settings-section" id="section-frame">
                 <h2>2. Select Frame Design</h2>
                 <div class="template-selector">
                     <button class="template-card active" data-template="polaroid">
@@ -186,12 +186,18 @@
                 </div>
             </div>
             
-            <!-- 3. Caption Customization & Camera Controls Section -->
-            <div class="settings-section">
-                <h2>3. Caption & Camera Controls</h2>
-                <div class="customization" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- 3. Caption Customization Section -->
+            <div class="settings-section" id="section-caption">
+                <h2>3. Caption Customization</h2>
+                <div class="customization">
                     <input type="text" id="captionInput" value="TRE-PAGI A" placeholder="Add custom text..." maxlength="20" />
-                    
+                </div>
+            </div>
+            
+            <!-- Camera Mirroring Control -->
+            <div class="settings-section" id="section-mirror">
+                <h2>Camera Controls</h2>
+                <div class="customization">
                     <div class="mirror-toggle-wrapper" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 0.8rem 1.2rem; border-radius: 16px;">
                         <div style="display: flex; flex-direction: column; gap: 0.2rem; text-align: left;">
                             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">📷 Efek Cermin (Mirror Preview)</span>
@@ -206,7 +212,7 @@
             </div>
 
             <!-- 4. Filter Selection Section -->
-            <div class="settings-section">
+            <div class="settings-section" id="section-filter">
                 <h2>4. Choose Photo Filter</h2>
                 <div class="filter-selector">
                     <button class="filter-card active" data-filter="normal">
@@ -237,7 +243,7 @@
             </div>
 
             <!-- 5. Cute Stickers / Emojis Section -->
-            <div class="settings-section">
+            <div class="settings-section" id="section-sticker">
                 <h2>5. Add Cute Emojis</h2>
                 <div class="sticker-selector">
                     <button class="sticker-card active" data-sticker="none">
@@ -285,9 +291,15 @@
             </div>
 
             <!-- Go to Booth CTA Button -->
-            <div class="booth-cta-wrapper">
+            <div class="booth-cta-wrapper" id="section-next-btn">
                 <button id="btnGoToBooth" class="btn primary-btn large-btn full-width-btn">
-                    ✨ Lanjut Ambil Foto 📸
+                    ✨ Lanjut Ke Studio 📸
+                </button>
+            </div>
+            
+            <div class="booth-cta-wrapper hidden" id="section-finish-btn" style="display: none;">
+                <button id="btnFinish" class="btn primary-btn large-btn full-width-btn">
+                    Selesai & Unduh 🎉
                 </button>
             </div>
         </aside>
@@ -295,9 +307,14 @@
         <!-- Main Photobooth View -->
         <main class="main-booth">
             <header>
-                <div class="booth-top-bar">
+                <div class="booth-top-bar" id="page2-back-btn">
                     <button id="btnBackToSetup" class="btn neutral-btn back-btn">
-                        ⬅️ Edit Pengaturan (Halaman 1)
+                        ⬅️ Kembali Pilih Layout
+                    </button>
+                </div>
+                <div class="booth-top-bar" id="page3-back-btn" style="display: none;">
+                    <button id="btnBackToBooth" class="btn neutral-btn back-btn">
+                        ⬅️ Foto Ulang (Studio)
                     </button>
                 </div>
                 <h1>📸 PHOTOBOOTH TRE-PAGI A</h1>

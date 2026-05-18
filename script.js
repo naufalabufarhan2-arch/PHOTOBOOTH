@@ -18,10 +18,14 @@ const stickerCards = document.querySelectorAll('.sticker-card');
 // Navigation / Multi-page DOM query
 const btnGoToBooth = document.getElementById('btnGoToBooth');
 const btnBackToSetup = document.getElementById('btnBackToSetup');
+const btnBackToBooth = document.getElementById('btnBackToBooth');
+const btnFinish = document.getElementById('btnFinish');
 const mirrorToggle = document.getElementById('mirrorToggle');
 const stickerOffsetInput = document.getElementById('stickerOffsetInput');
 const stickerOffsetValue = document.getElementById('stickerOffsetValue');
 const appContainer = document.querySelector('.app-container');
+const sidebar = document.querySelector('.sidebar');
+const mainBooth = document.querySelector('.main-booth');
 
 const ctx = canvas.getContext('2d');
 
@@ -222,18 +226,102 @@ stickerOffsetInput.addEventListener('input', (e) => {
     renderFinalLayout();
   }
 });
-// Halaman 1 -> Halaman 2 transition: Lanjut ke Booth Studio
-btnGoToBooth.addEventListener('click', () => {
-  appContainer.classList.add('show-booth');
-  // Auto-scroll screen to top for nice immersive view
+// ==========================================
+// 3-PAGE WORKFLOW NAVIGATION LOGIC
+// ==========================================
+
+function showPage1() {
+  appContainer.classList.remove('show-booth');
+  
+  // Show/Hide Sidebar Sections
+  document.getElementById('section-layout').style.display = 'flex';
+  document.getElementById('section-mirror').style.display = 'flex';
+  document.getElementById('section-next-btn').style.display = 'flex';
+  
+  document.getElementById('section-frame').style.display = 'none';
+  document.getElementById('section-caption').style.display = 'none';
+  document.getElementById('section-filter').style.display = 'none';
+  document.getElementById('section-sticker').style.display = 'none';
+  document.getElementById('section-finish-btn').style.display = 'none';
+  
+  // Main Container Toggles
+  sidebar.style.display = 'flex';
+  mainBooth.style.display = 'none';
+  
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showPage2() {
+  appContainer.classList.add('show-booth');
+  
+  // Main Container Toggles
+  sidebar.style.display = 'none';
+  mainBooth.style.display = 'flex';
+  
+  // Video vs Canvas
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  
+  // Controls
+  captureBtn.classList.remove('hidden');
+  resetBtn.classList.add('hidden');
+  downloadLink.classList.add('hidden');
+  
+  // Headers
+  document.getElementById('page2-back-btn').style.display = 'flex';
+  document.getElementById('page3-back-btn').style.display = 'none';
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showPage3() {
+  appContainer.classList.remove('show-booth');
+  
+  // Show/Hide Sidebar Sections
+  document.getElementById('section-layout').style.display = 'none';
+  document.getElementById('section-mirror').style.display = 'none';
+  document.getElementById('section-next-btn').style.display = 'none';
+  
+  document.getElementById('section-frame').style.display = 'flex';
+  document.getElementById('section-caption').style.display = 'flex';
+  document.getElementById('section-filter').style.display = 'flex';
+  document.getElementById('section-sticker').style.display = 'flex';
+  document.getElementById('section-finish-btn').style.display = 'flex';
+  
+  // Main Container Toggles
+  sidebar.style.display = 'flex';
+  mainBooth.style.display = 'flex';
+  
+  // Video vs Canvas
+  video.style.display = 'none';
+  canvas.style.display = 'block';
+  
+  // Controls
+  captureBtn.classList.add('hidden');
+  resetBtn.classList.remove('hidden');
+  downloadLink.classList.remove('hidden');
+  
+  // Headers
+  document.getElementById('page2-back-btn').style.display = 'none';
+  document.getElementById('page3-back-btn').style.display = 'flex';
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Bind Navigation Buttons
+btnGoToBooth.addEventListener('click', showPage2);
+btnBackToSetup.addEventListener('click', showPage1);
+btnBackToBooth.addEventListener('click', showPage2);
+btnFinish.addEventListener('click', () => {
+  showPage1();
+  alert("Foto berhasil disimpan! Terima kasih sudah menggunakan Photobooth TRE-PAGI A!");
 });
 
-// Halaman 2 -> Halaman 1 transition: Kembali ke Pengaturan Setup
-btnBackToSetup.addEventListener('click', () => {
-  appContainer.classList.remove('show-booth');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// Initialize first page view on load
+document.addEventListener("DOMContentLoaded", () => {
+  showPage1();
 });
+
 
 // Start sequential capture based on active layout limits
 function startCaptureSequence() {
@@ -299,6 +387,9 @@ function capturePose(index, total) {
         } else {
           // All taken! Draw composite layout
           renderFinalLayout();
+          
+          // Automatically navigate to Page 3 (Editor & Download)
+          showPage3();
           
           // Remove camera active borders
           const wrapper = document.querySelector('.camera-wrapper');

@@ -799,7 +799,7 @@ video.filter-vivid { filter: saturate(1.6) contrast(1.1); }
 }
 
 .main-booth {
-  display: none !important; /* Hidden on Page 1 */
+  display: none; /* Hidden on Page 1 */
 }
 
 /* Page 2 Active State styling (FULL IMMERSIVE SCREEN MODE!) */
