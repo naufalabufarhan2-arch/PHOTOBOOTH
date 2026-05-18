@@ -104,6 +104,22 @@ canvas {
   transform: translateY(0);
 }
 
+/* Utility class to hide elements */
+.hidden { display: none; }
+
+/* Neutral button style (similar to secondary) */
+.btn.neutral {
+  background: var(--secondary-color);
+  color: #fff;
+}
+
+/* Timestamp label styling */
+.time-label {
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+  color: var(--text-color);
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 1rem;
