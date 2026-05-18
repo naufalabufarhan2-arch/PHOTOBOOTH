@@ -22,20 +22,27 @@ let countdownInterval = null;
 let stream = null;
 let photosTaken = []; // Array of offscreen canvases holding intermediate shots
 
-// Layout definitions
+// Layout definitions (Dynamic canvas sizes)
 const LAYOUTS = {
   'four-cuts': { photosNeeded: 4, width: 360, height: 1150 },
   'grid-2x2': { photosNeeded: 4, width: 640, height: 820 },
   'three-cuts': { photosNeeded: 3, width: 360, height: 880 },
-  'single-shot': { photosNeeded: 1, width: 600, height: 750 }
+  'single-shot': { photosNeeded: 1, width: 600, height: 750 },
+  // Advanced layouts
+  'combo-grid': { photosNeeded: 4, width: 600, height: 920 },      // 1 Big, 3 Small
+  'grid-2x3': { photosNeeded: 6, width: 640, height: 1050 },      // 2x3 grid
+  'double-landscape': { photosNeeded: 2, width: 600, height: 750 },// 2 wide photos
+  'double-portrait': { photosNeeded: 2, width: 360, height: 680 }  // 2 narrow photos
 };
 
-// Fun Pose Recommendations
+// Expanded Pose Recommendations for up to 6 poses
 const POSE_IDEAS = [
   "Pose 1: Smile! 😃",
   "Pose 2: Give a Heart! 🫶",
   "Pose 3: Wink! 😉",
-  "Pose 4: Go Crazy! 🤪"
+  "Pose 4: Go Crazy! 🤪",
+  "Pose 5: Cool Swag! 😎",
+  "Pose 6: Peace Sign! ✌️"
 ];
 
 // Initialize camera
@@ -90,7 +97,6 @@ layoutCards.forEach(card => {
 
 // Start sequential capture based on active layout limits
 function startCaptureSequence() {
-  // Hide UI buttons to prevent double click
   captureBtn.classList.add('hidden');
   resetBtn.classList.add('hidden');
   downloadLink.classList.add('hidden');
@@ -175,34 +181,38 @@ function triggerCameraFlash(callback) {
   }, 100);
 }
 
-// Crops and captures the current video frame into an offscreen canvas
+// Grabs and stores high-resolution raw camera frame
 function grabVideoFrame() {
   const offscreen = document.createElement('canvas');
   const oCtx = offscreen.getContext('2d');
   
-  // Standard slot size (portrait 4:3 or similar)
-  offscreen.width = 400;
-  offscreen.height = 300;
+  // Store high resolution raw frame matching input video dimensions
+  offscreen.width = video.videoWidth || 1280;
+  offscreen.height = video.videoHeight || 720;
   
-  // Crop the source video correctly to fill the 4:3 offscreen slot
-  const sourceAspectRatio = video.videoWidth / video.videoHeight;
-  const targetAspectRatio = offscreen.width / offscreen.height;
+  oCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+  return offscreen;
+}
+
+// Dynamic slot crop algorithm: crops snapshot to perfectly fit target dimensions
+function drawPhotoToSlot(snapshot, targetX, targetY, targetWidth, targetHeight) {
+  const sourceAspectRatio = snapshot.width / snapshot.height;
+  const targetAspectRatio = targetWidth / targetHeight;
 
   let sx, sy, sWidth, sHeight;
   if (sourceAspectRatio > targetAspectRatio) {
-    sHeight = video.videoHeight;
-    sWidth = video.videoHeight * targetAspectRatio;
-    sx = (video.videoWidth - sWidth) / 2;
+    sHeight = snapshot.height;
+    sWidth = snapshot.height * targetAspectRatio;
+    sx = (snapshot.width - sWidth) / 2;
     sy = 0;
   } else {
-    sWidth = video.videoWidth;
-    sHeight = video.videoWidth / targetAspectRatio;
+    sWidth = snapshot.width;
+    sHeight = snapshot.width / targetAspectRatio;
     sx = 0;
-    sy = (video.videoHeight - sHeight) / 2;
+    sy = (snapshot.height - sHeight) / 2;
   }
 
-  oCtx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, offscreen.width, offscreen.height);
-  return offscreen;
+  ctx.drawImage(snapshot, sx, sy, sWidth, sHeight, targetX, targetY, targetWidth, targetHeight);
 }
 
 // Combines all captured poses onto the final Canvas with frame background and overlays
@@ -233,14 +243,10 @@ function renderFinalLayout() {
 
     for (let i = 0; i < needed; i++) {
       const targetY = borderOffset + i * (slotHeight + gap);
-      // Draw intermediate photo
       if (photosTaken[i]) {
-        ctx.drawImage(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
+        drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
       }
-      // Add thin outline around photo
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(borderOffset, targetY, slotWidth, slotHeight);
+      drawInnerFrameOutline(borderOffset, targetY, slotWidth, slotHeight);
     }
 
   } else if (activeLayout === 'grid-2x2') {
@@ -258,11 +264,9 @@ function renderFinalLayout() {
     for (let i = 0; i < 4; i++) {
       const coord = coordinates[i];
       if (photosTaken[i]) {
-        ctx.drawImage(photosTaken[i], coord.x, coord.y, slotWidth, slotHeight);
+        drawPhotoToSlot(photosTaken[i], coord.x, coord.y, slotWidth, slotHeight);
       }
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(coord.x, coord.y, slotWidth, slotHeight);
+      drawInnerFrameOutline(coord.x, coord.y, slotWidth, slotHeight);
     }
 
   } else if (activeLayout === 'single-shot') {
@@ -270,11 +274,76 @@ function renderFinalLayout() {
     const slotWidth = canvas.width - (borderOffset * 2);
     const slotHeight = canvas.height - borderOffset - bottomOffset;
     if (photosTaken[0]) {
-      ctx.drawImage(photosTaken[0], borderOffset, borderOffset, slotWidth, slotHeight);
+      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, slotWidth, slotHeight);
     }
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(borderOffset, borderOffset, slotWidth, slotHeight);
+    drawInnerFrameOutline(borderOffset, borderOffset, slotWidth, slotHeight);
+
+  } else if (activeLayout === 'combo-grid') {
+    // 1 Big + 3 Small (4 photos)
+    const bigWidth = canvas.width - (borderOffset * 2);
+    const bigHeight = (canvas.height - borderOffset - bottomOffset - gap) * 0.55;
+    
+    const smallWidth = (canvas.width - (borderOffset * 2) - (2 * gap)) / 3;
+    const smallHeight = canvas.height - borderOffset - bottomOffset - gap - bigHeight;
+
+    // Big Photo slot
+    if (photosTaken[0]) {
+      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, bigWidth, bigHeight);
+    }
+    drawInnerFrameOutline(borderOffset, borderOffset, bigWidth, bigHeight);
+
+    // Small photo slots
+    for (let i = 0; i < 3; i++) {
+      const targetX = borderOffset + i * (smallWidth + gap);
+      const targetY = borderOffset + bigHeight + gap;
+      if (photosTaken[i + 1]) {
+        drawPhotoToSlot(photosTaken[i + 1], targetX, targetY, smallWidth, smallHeight);
+      }
+      drawInnerFrameOutline(targetX, targetY, smallWidth, smallHeight);
+    }
+
+  } else if (activeLayout === 'grid-2x3') {
+    // 6 slots in a 2x3 Grid
+    const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 2; col++) {
+        const i = row * 2 + col;
+        const targetX = borderOffset + col * (slotWidth + gap);
+        const targetY = borderOffset + row * (slotHeight + gap);
+        if (photosTaken[i]) {
+          drawPhotoToSlot(photosTaken[i], targetX, targetY, slotWidth, slotHeight);
+        }
+        drawInnerFrameOutline(targetX, targetY, slotWidth, slotHeight);
+      }
+    }
+
+  } else if (activeLayout === 'double-landscape') {
+    // 2 Wide Landscape Photos stacked vertically
+    const slotWidth = canvas.width - (borderOffset * 2);
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+
+    for (let i = 0; i < 2; i++) {
+      const targetY = borderOffset + i * (slotHeight + gap);
+      if (photosTaken[i]) {
+        drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
+      }
+      drawInnerFrameOutline(borderOffset, targetY, slotWidth, slotHeight);
+    }
+
+  } else if (activeLayout === 'double-portrait') {
+    // 2 Narrow Portrait Photos stacked vertically
+    const slotWidth = canvas.width - (borderOffset * 2);
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+
+    for (let i = 0; i < 2; i++) {
+      const targetY = borderOffset + i * (slotHeight + gap);
+      if (photosTaken[i]) {
+        drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
+      }
+      drawInnerFrameOutline(borderOffset, targetY, slotWidth, slotHeight);
+    }
   }
 
   // 3. Draw Watermark, captions, logos at bottom
@@ -295,6 +364,13 @@ function renderFinalLayout() {
   }, 'image/png');
 }
 
+// Inner frame outline outline
+function drawInnerFrameOutline(x, y, w, h) {
+  ctx.strokeStyle = activeTemplate === 'minimalist' ? '#d4af37' : 'rgba(0, 0, 0, 0.1)';
+  ctx.lineWidth = activeTemplate === 'minimalist' ? 1.5 : 1;
+  ctx.strokeRect(x, y, w, h);
+}
+
 // Background fills for frame templates
 function drawTemplateBackground() {
   if (activeTemplate === 'polaroid') {
@@ -313,6 +389,30 @@ function drawTemplateBackground() {
   } else if (activeTemplate === 'minimalist') {
     ctx.fillStyle = '#111111';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'cherry') {
+    // Cherry blossom pink solid bg
+    ctx.fillStyle = '#fff6f6';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'filmstrip') {
+    // Solid dark film charcoal
+    ctx.fillStyle = '#18181b';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'vaporwave') {
+    // Hot retro sunset neon
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#00f0ff');
+    grad.addColorStop(0.7, '#ff007f');
+    grad.addColorStop(1, '#6b21a8');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'y2k') {
+    // Silver metallic chrome radial
+    const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, canvas.height*0.7);
+    grad.addColorStop(0, '#f1f5f9');
+    grad.addColorStop(0.6, '#cbd5e1');
+    grad.addColorStop(1, '#475569');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
@@ -322,13 +422,10 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
 
   if (activeTemplate === 'polaroid') {
     ctx.fillStyle = '#222222';
-    
-    // Caption (left aligned)
     ctx.font = 'bold 32px "Satisfy", cursive, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(caption || "Happy Moments ✨", margin + 10, textY);
 
-    // Timestamp (right aligned)
     ctx.font = '500 14px "Outfit", sans-serif';
     ctx.fillStyle = '#777777';
     ctx.textAlign = 'right';
@@ -336,19 +433,15 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
 
   } else if (activeTemplate === 'pastel') {
     ctx.fillStyle = '#4f46e5';
-    
-    // Caption (center)
     ctx.font = 'bold 26px "Outfit", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(caption || "Lovely Day 💕", canvas.width / 2, textY);
 
-    // Watermark
     ctx.font = '600 13px "Outfit", sans-serif';
     ctx.fillStyle = 'rgba(79, 70, 229, 0.6)';
     ctx.fillText(`MALL PHOTOBOX • ${dateTime}`, canvas.width / 2, textY + 25);
 
   } else if (activeTemplate === 'cyberpunk') {
-    // Neon neon glow borders on bottom text area
     ctx.fillStyle = '#06b6d4';
     ctx.font = 'bold 20px monospace';
     ctx.textAlign = 'left';
@@ -362,8 +455,6 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
 
   } else if (activeTemplate === 'minimalist') {
     ctx.fillStyle = '#d4af37';
-    
-    // Serif luxury lettering
     ctx.font = 'bold 24px serif';
     ctx.textAlign = 'center';
     ctx.fillText(caption.toUpperCase() || "M E M O R I E S", canvas.width / 2, textY);
@@ -371,6 +462,132 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.font = 'italic 13px serif';
     ctx.fillStyle = '#888888';
     ctx.fillText(dateTime, canvas.width / 2, textY + 25);
+
+  } else if (activeTemplate === 'cherry') {
+    // Cherry Blossom frame - programmatically draw branches/petals in margins
+    ctx.save();
+    
+    // Top Branch
+    ctx.beginPath();
+    ctx.strokeStyle = '#653b2a';
+    ctx.lineWidth = 3;
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(canvas.width/4, 25, canvas.width/2, 10);
+    ctx.stroke();
+
+    // Draw little cherry blossom petals
+    ctx.fillStyle = '#fbcfe8';
+    ctx.strokeStyle = '#db2777';
+    ctx.lineWidth = 1;
+    
+    // Draw 4 circular cherry blossom circles
+    const flowerX = [20, 60, 110, canvas.width - 50];
+    const flowerY = [15, 25, 20, 20];
+    
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.arc(flowerX[i], flowerY[i], 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Typography
+    ctx.fillStyle = '#db2777';
+    ctx.font = 'bold 28px "Satisfy", cursive, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(caption || "Spring Bliss 🌸", canvas.width / 2, textY);
+
+    ctx.font = '500 13px "Outfit", sans-serif';
+    ctx.fillStyle = '#f472b6';
+    ctx.fillText(dateTime, canvas.width / 2, textY + 25);
+
+  } else if (activeTemplate === 'filmstrip') {
+    // Vintage filmstrip - draw sprocket holes along margins
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    
+    // Loop sprocket holes vertically
+    const startY = margin;
+    const endY = canvas.height - bottomOffset - 10;
+    
+    for (let y = startY; y < endY; y += 32) {
+      // Left sprocket hole
+      ctx.fillRect(margin/2 - 4, y, 8, 12);
+      // Right sprocket hole
+      ctx.fillRect(canvas.width - margin/2 - 4, y, 8, 12);
+    }
+    ctx.restore();
+
+    // Vintage Typography
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 22px "Outfit", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`🎞️ ${caption.toUpperCase() || "KODAK 400TX"}`, margin + 10, textY);
+
+    ctx.font = '500 13px monospace';
+    ctx.fillStyle = '#d97706';
+    ctx.textAlign = 'right';
+    ctx.fillText(`FRAME #24 - ${dateTime}`, margin + width - 10, textY + 5);
+
+  } else if (activeTemplate === 'vaporwave') {
+    // 80s Grid lines overlay in bottom panel
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+    ctx.lineWidth = 1;
+    // Draw 3 horizontal grid lines near the bottom
+    for (let gridY = canvas.height - bottomOffset; gridY < canvas.height; gridY += 24) {
+      ctx.beginPath();
+      ctx.moveTo(0, gridY);
+      ctx.lineTo(canvas.width, gridY);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Outrun typography
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#ff007f';
+    ctx.shadowBlur = 10;
+    ctx.font = 'bold 26px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(caption || "OUTRUN RETRO 🌴", canvas.width / 2, textY);
+    ctx.restore();
+
+    ctx.font = 'bold 12px monospace';
+    ctx.fillStyle = '#00f0ff';
+    ctx.textAlign = 'center';
+    ctx.fillText(`EST. 198X • ${dateTime}`, canvas.width / 2, textY + 25);
+
+  } else if (activeTemplate === 'y2k') {
+    // Y2K Metallic sparkly stars
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    
+    // Draw 4-point Y2K sparkles
+    const drawSparkle = (cx, cy, size) => {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size);
+      ctx.quadraticCurveTo(cx, cy, cx + size, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy + size);
+      ctx.quadraticCurveTo(cx, cy, cx - size, cy);
+      ctx.quadraticCurveTo(cx, cy, cx, cy - size);
+      ctx.fill();
+    };
+
+    drawSparkle(margin + 20, textY - 10, 10);
+    drawSparkle(canvas.width - margin - 20, textY + 15, 8);
+    ctx.restore();
+
+    // Futurist blue text
+    ctx.fillStyle = '#2563eb';
+    ctx.font = 'bold 25px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(caption || "STARRY DREAM ✨", canvas.width / 2, textY);
+
+    ctx.font = '800 13px "Outfit", sans-serif';
+    ctx.fillStyle = '#3b82f6';
+    ctx.fillText(`Y2K SPACE • ${dateTime}`, canvas.width / 2, textY + 25);
   }
 }
 

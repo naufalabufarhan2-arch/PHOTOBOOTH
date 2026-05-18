@@ -40,10 +40,11 @@ body {
 /* Container & Layout */
 .app-container {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 350px 1fr;
   gap: 2.5rem;
-  max-width: 1100px;
+  max-width: 1200px;
   width: 100%;
+  max-height: 90vh; /* Keeps it within view height */
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-glass);
   backdrop-filter: blur(25px);
@@ -51,15 +52,33 @@ body {
   border-radius: 24px;
   padding: 2.5rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
-/* Sidebar Styling */
+/* Sidebar Styling with Scrollability */
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   border-right: 1px solid var(--border-glass);
-  padding-right: 2rem;
+  padding-right: 1.5rem;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+/* Custom premium scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .settings-section {
@@ -69,7 +88,7 @@ body {
 }
 
 .sidebar h2 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
   -webkit-background-clip: text;
@@ -120,8 +139,8 @@ body {
 
 /* Layout Icons CSS representation */
 .layout-icon {
-  width: 40px;
-  height: 50px;
+  width: 42px;
+  height: 52px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
@@ -174,6 +193,60 @@ body {
   border-radius: 2px;
 }
 
+/* New CSS Layout Icons representation */
+.layout-icon.combo-4 {
+  flex-direction: column;
+}
+.layout-icon.combo-4 .big {
+  flex: 2;
+  background: #facc15;
+  opacity: 0.5;
+  border-radius: 2px;
+}
+.layout-icon.combo-4 .row {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+.layout-icon.combo-4 .row span {
+  flex: 1;
+  background: #facc15;
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+.layout-icon.grid-6 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
+}
+.layout-icon.grid-6 span {
+  background: #a855f7;
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+.layout-icon.landscape-2 {
+  flex-direction: column;
+}
+.layout-icon.landscape-2 span {
+  flex: 1;
+  background: #10b981;
+  opacity: 0.5;
+  border-radius: 2px;
+}
+
+.layout-icon.portrait-2 {
+  flex-direction: column;
+}
+.layout-icon.portrait-2 span {
+  flex: 1;
+  margin: 0 4px;
+  background: #e11d48;
+  opacity: 0.5;
+  border-radius: 2px;
+}
+
 /* Template Select Cards */
 .template-selector {
   display: flex;
@@ -217,11 +290,17 @@ body {
   flex-shrink: 0;
 }
 
-/* Preview Gradients */
+/* Preview Gradients and Colors for all 8 templates */
 .template-preview.polaroid { background: #ffffff; }
 .template-preview.pastel { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
-.template-preview.cyberpunk { background: linear-gradient(135deg, #120c1f 0%, #06b6d4 100%); position: relative; border: 2px solid #ec4899; }
+.template-preview.cyberpunk { background: linear-gradient(135deg, #120c1f 0%, #06b6d4 100%); border: 2px solid #ec4899; }
 .template-preview.minimalist { background: #111111; border: 1.5px solid #d4af37; }
+
+/* New Previews */
+.template-preview.cherry { background: #fff5f5; border: 2.5px solid #ffb7b2; }
+.template-preview.filmstrip { background: #1f1f1f; border-left: 3px dashed #ffffff; border-right: 3px dashed #ffffff; }
+.template-preview.vaporwave { background: linear-gradient(to bottom, #00f0ff, #ff007f); }
+.template-preview.y2k { background: radial-gradient(circle, #e2e8f0 0%, #3b82f6 100%); border: 2px solid #ffffff; }
 
 .template-card span {
   font-size: 0.95rem;
@@ -251,11 +330,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .main-booth header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .main-booth h1 {
@@ -277,11 +358,11 @@ body {
 .booth-container {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 440px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-glass);
   border-radius: 20px;
-  padding: 1.2rem;
+  padding: 1rem;
   box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
@@ -316,7 +397,7 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain; /* ensures tall strips fit nicely inside preview box! */
+  object-fit: contain; /* ensures all strips fit nicely inside preview box! */
   border-radius: 14px;
   opacity: 0;
   pointer-events: none;
@@ -395,14 +476,14 @@ canvas {
   justify-content: center;
   gap: 1rem;
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.9rem 1.8rem;
+  padding: 0.8rem 1.6rem;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 14px;
@@ -472,12 +553,14 @@ canvas {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 1.5rem;
+    max-height: none;
   }
   .sidebar {
     border-right: none;
     border-bottom: 1px solid var(--border-glass);
     padding-right: 0;
     padding-bottom: 1.5rem;
+    max-height: 400px;
   }
   .main-booth h1 {
     font-size: 1.8rem;

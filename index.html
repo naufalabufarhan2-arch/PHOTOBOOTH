@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Premium Mall-Style Photobooth</title>
-    <meta name="description" content="Mall-style photobooth with multiple grid layouts, decorative frame templates, and countdown timer." />
+    <title>PHOTOBOOTH TRE-PAGI A</title>
+    <meta name="description" content="Premium class photobooth with 8 layouts, 8 decorative templates, customized typography, and automated pose-by-pose countdowns." />
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
     <div class="app-container">
         <!-- Sidebar for Settings -->
         <aside class="sidebar">
-            <!-- 1. Layout Selector Section -->
+            <!-- 1. Layout Selector Section (8 Options) -->
             <div class="settings-section">
                 <h2>1. Choose Photo Layout</h2>
                 <div class="layout-selector">
@@ -30,7 +30,7 @@
                         <div class="layout-icon grid-4">
                             <span></span><span></span><span></span><span></span>
                         </div>
-                        <span>2x2 Classic Grid</span>
+                        <span>2x2 Classic</span>
                     </button>
                     <button class="layout-card" data-layout="three-cuts">
                         <div class="layout-icon strip-3">
@@ -44,10 +44,37 @@
                         </div>
                         <span>Single Portrait</span>
                     </button>
+                    
+                    <!-- NEW ADVANCED LAYOUTS -->
+                    <button class="layout-card" data-layout="combo-grid">
+                        <div class="layout-icon combo-4">
+                            <span class="big"></span>
+                            <div class="row"><span></span><span></span><span></span></div>
+                        </div>
+                        <span>1 Big + 3 Small</span>
+                    </button>
+                    <button class="layout-card" data-layout="grid-2x3">
+                        <div class="layout-icon grid-6">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <span>2x3 Grid (6 Poses)</span>
+                    </button>
+                    <button class="layout-card" data-layout="double-landscape">
+                        <div class="layout-icon landscape-2">
+                            <span></span><span></span>
+                        </div>
+                        <span>2 Wide Landscape</span>
+                    </button>
+                    <button class="layout-card" data-layout="double-portrait">
+                        <div class="layout-icon portrait-2">
+                            <span></span><span></span>
+                        </div>
+                        <span>2 Narrow Portrait</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- 2. Frame Design Selector Section -->
+            <!-- 2. Frame Design Selector Section (8 Options) -->
             <div class="settings-section">
                 <h2>2. Select Frame Design</h2>
                 <div class="template-selector">
@@ -67,6 +94,24 @@
                         <div class="template-preview minimalist"></div>
                         <span>Elegant Minimal</span>
                     </button>
+                    
+                    <!-- NEW PREMIUM BINGKAI -->
+                    <button class="template-card" data-template="cherry">
+                        <div class="template-preview cherry"></div>
+                        <span>Sakura Blossom</span>
+                    </button>
+                    <button class="template-card" data-template="filmstrip">
+                        <div class="template-preview filmstrip"></div>
+                        <span>Vintage Filmstrip</span>
+                    </button>
+                    <button class="template-card" data-template="vaporwave">
+                        <div class="template-preview vaporwave"></div>
+                        <span>80s Vaporwave</span>
+                    </button>
+                    <button class="template-card" data-template="y2k">
+                        <div class="template-preview y2k"></div>
+                        <span>Y2K Starry Dream</span>
+                    </button>
                 </div>
             </div>
             
@@ -74,7 +119,7 @@
             <div class="settings-section">
                 <h2>3. Custom Caption</h2>
                 <div class="customization">
-                    <input type="text" id="captionInput" placeholder="Add custom text..." maxlength="20" />
+                    <input type="text" id="captionInput" value="TRE-PAGI A" placeholder="Add custom text..." maxlength="20" />
                 </div>
             </div>
         </aside>
@@ -82,8 +127,8 @@
         <!-- Main Photobooth View -->
         <main class="main-booth">
             <header>
-                <h1>📸 Mall Photo Strip Creator</h1>
-                <p>Pick a layout, select a theme frame, custom caption, and pose!</p>
+                <h1>📸 PHOTOBOOTH TRE-PAGI A</h1>
+                <p>Semangat pagi Teknologi Rekayasa Elektronika! Yuk abadikan momen kelasmu!</p>
             </header>
 
             <div class="booth-container">
