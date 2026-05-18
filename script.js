@@ -791,13 +791,32 @@ function renderFinalLayout() {
 
 // Inner frame outline outline
 function drawInnerFrameOutline(x, y, w, h) {
+  ctx.save();
   ctx.strokeStyle = activeTemplate === 'minimalist' ? '#d4af37' : 'rgba(0, 0, 0, 0.1)';
   ctx.lineWidth = activeTemplate === 'minimalist' ? 1.5 : 1;
-  ctx.strokeRect(x, y, w, h);
+  
+  if (activeTemplate === 'retro-pop') {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    ctx.translate(cx, cy);
+    const rotateRad = (x < canvas.width / 2) ? -0.06 : 0.06;
+    ctx.rotate(rotateRad);
+    ctx.strokeRect(-w / 2, -h / 2, w, h);
+  } else {
+    ctx.strokeRect(x, y, w, h);
+  }
+  ctx.restore();
 }
 
 // Background fills for frame templates
 function drawTemplateBackground() {
+  if (activeLayout === 'newspaper-poetic' || activeTemplate === 'newspaper') {
+    // Retro Newsprint Cream
+    ctx.fillStyle = '#fdfaf2';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
   if (activeTemplate === 'polaroid') {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -931,6 +950,59 @@ function drawTemplateBackground() {
 // Overlay decoratives and text watermarks
 function drawTemplateOverlay(margin, width, caption, dateTime) {
   const textY = canvas.height - 55;
+
+  if (activeLayout === 'newspaper-poetic' || activeTemplate === 'newspaper') {
+    // Newspaper border styling (vintage cream and black ink lines)
+    ctx.save();
+    ctx.strokeStyle = '#000000';
+    
+    // 1. Draw top headline
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 36px "Playfair Display", "Georgia", serif';
+    ctx.textAlign = 'center';
+    
+    const currentCaption = document.getElementById('captionInput').value.trim() || "KOTA METRO HARI INI";
+    ctx.fillText(currentCaption, canvas.width / 2, 70);
+    
+    // 2. Draw sub-headline texts
+    ctx.font = 'bold 13px "Playfair Display", "Georgia", serif';
+    ctx.fillStyle = '#222222';
+    
+    // Left side: month & year
+    ctx.textAlign = 'left';
+    ctx.fillText("April 2026", margin, 105);
+    
+    // Right side: Edisi Terbatas
+    ctx.textAlign = 'right';
+    ctx.fillText("EDISI TERBATAS", canvas.width - margin, 105);
+    
+    // 3. Draw premium double black line separator
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(margin, 115);
+    ctx.lineTo(canvas.width - margin, 115);
+    ctx.stroke();
+    
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin, 120);
+    ctx.lineTo(canvas.width - margin, 120);
+    ctx.stroke();
+    
+    // 4. Draw solid black bottom brand banner
+    const bannerY = canvas.height - 70;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(margin, bannerY, canvas.width - (margin * 2), 42);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px "Playfair Display", "Georgia", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("@kalabooth", canvas.width / 2, bannerY + 21);
+    
+    ctx.restore();
+    return;
+  }
 
   if (activeTemplate === 'polaroid') {
     ctx.fillStyle = '#222222';
