@@ -241,6 +241,10 @@ function startCaptureSequence() {
   resetBtn.classList.add('hidden');
   downloadLink.classList.add('hidden');
   
+  // Add active pulsing neon glow border to camera wrapper
+  const wrapper = document.querySelector('.camera-wrapper');
+  if (wrapper) wrapper.classList.add('shooting');
+  
   photosTaken = [];
   const totalPhotos = LAYOUTS[activeLayout].photosNeeded;
   
@@ -258,25 +262,35 @@ function capturePose(index, total) {
   
   let timeLeft = 3;
   countdownText.textContent = timeLeft;
+  
+  // Restart countdown spring zoom animation on tick 3
+  countdownText.classList.remove('tick-active');
+  void countdownText.offsetWidth; // Force reflow
+  countdownText.classList.add('tick-active');
+  
   playBeep(440, 100);
 
   countdownInterval = setInterval(() => {
     timeLeft--;
     if (timeLeft > 0) {
       countdownText.textContent = timeLeft;
+      
+      // Trigger spring zoom reflow animation on tick 2 and 1!
+      countdownText.classList.remove('tick-active');
+      void countdownText.offsetWidth; // Force reflow
+      countdownText.classList.add('tick-active');
+      
       playBeep(440, 100);
     } else {
       clearInterval(countdownInterval);
       
       // Flash screen & Take Snapshot
       triggerCameraFlash(() => {
-        // Save intermediate frame
         const snapshot = grabVideoFrame();
         photosTaken.push(snapshot);
         
         countdownOverlay.classList.add('hidden');
         
-        // Check if we need more shots
         if (photosTaken.length < total) {
           statusBadge.textContent = "Prepare next pose!";
           setTimeout(() => {
@@ -285,6 +299,11 @@ function capturePose(index, total) {
         } else {
           // All taken! Draw composite layout
           renderFinalLayout();
+          
+          // Remove camera active borders
+          const wrapper = document.querySelector('.camera-wrapper');
+          if (wrapper) wrapper.classList.remove('shooting');
+          statusBadge.classList.remove('shooting');
         }
       });
     }

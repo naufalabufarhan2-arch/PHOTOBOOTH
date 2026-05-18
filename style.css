@@ -1114,3 +1114,123 @@ input[type=range]::-webkit-slider-thumb {
 input[type=range]::-webkit-slider-thumb:hover {
   transform: scale(1.2);
 }
+
+/* ==========================================================================
+   ✨ PREMIUM MICRO-ANIMATIONS & TRANSITIONS (WOW EFFECT!)
+   ========================================================================== */
+
+/* 1. Cinematic Slide-Up Fade-In for Studio view (Halaman 2) */
+.app-container.show-booth .main-booth {
+  animation: fadeInSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeInSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 2. Spring Bounce Countdown Tick */
+#countdownText.tick-active {
+  animation: springBounce 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes springBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-20deg);
+    filter: blur(5px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3) rotate(8deg);
+    filter: blur(0);
+  }
+  75% {
+    transform: scale(0.92) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 3. Floating Cards Micro-Animations (Gentle Water Hover) */
+.layout-card:hover, .template-card:hover, .filter-card:hover, .sticker-card:hover {
+  transform: translateY(-8px) scale(1.03) !important;
+  box-shadow: 0 15px 30px rgba(236, 72, 153, 0.25), 0 0 15px rgba(255,255,255,0.05) !important;
+}
+
+/* 4. Active Selection Neon Pulse Glow */
+.layout-card.active, .template-card.active, .filter-card.active, .sticker-card.active {
+  animation: neonPulseBorder 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes neonPulseBorder {
+  0% {
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.4), inset 0 0 5px rgba(236, 72, 153, 0.2);
+  }
+  100% {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.7), inset 0 0 10px rgba(79, 70, 229, 0.3);
+  }
+}
+
+/* 5. Breathing Glow for Camera Stream Outer Border */
+.camera-wrapper {
+  position: relative;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0px rgba(236,72,153,0);
+}
+
+.camera-wrapper.shooting {
+  animation: cameraShootingPulse 1s infinite alternate;
+}
+
+@keyframes cameraShootingPulse {
+  0% {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 15px rgba(236,72,153,0.3);
+    border-color: var(--accent-pink);
+  }
+  100% {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 35px rgba(236,72,153,0.7);
+    border-color: var(--accent-blue);
+  }
+}
+
+/* 6. Shimmer Sheen Light Sweep on CTA and Primary Buttons */
+.btn.primary-btn, #btnGoToBooth {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn.primary-btn::after, #btnGoToBooth::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-25deg);
+  animation: lightSweep 4.5s infinite ease-in-out;
+}
+
+@keyframes lightSweep {
+  0% { left: -150%; }
+  35% { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* 7. Enhanced camera flash animation */
+.flash-overlay {
+  transition: opacity 0.5s ease-out;
+}
