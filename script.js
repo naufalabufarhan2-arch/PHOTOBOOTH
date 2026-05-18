@@ -453,20 +453,117 @@ function drawPhotoToSlot(snapshot, targetX, targetY, targetWidth, targetHeight) 
   ctx.restore();
 
   // Draw cute emojis and stickers on top of the slot
-  drawStickersToSlot(targetX, targetY, targetWidth, targetHeight);
+  drawStickersToSlot(snapshot, targetX, targetY, targetWidth, targetHeight);
+}
+
+// Scan snapshot pixels to automatically locate human faces (returns normalized {x, y, width} ratios)
+function detectFaceInPhoto(snapshot, targetWidth, targetHeight) {
+  // Create a small offscreen canvas to scan quickly (performance optimization)
+  const scanCanvas = document.createElement('canvas');
+  const scanWidth = 100; // Small scale for lightning-fast scan
+  const scanHeight = Math.round(100 * (snapshot.height / snapshot.width));
+  scanCanvas.width = scanWidth;
+  scanCanvas.height = scanHeight;
+  
+  const sCtx = scanCanvas.getContext('2d');
+  sCtx.drawImage(snapshot, 0, 0, scanWidth, scanHeight);
+  
+  let imgData;
+  try {
+    imgData = sCtx.getImageData(0, 0, scanWidth, scanHeight);
+  } catch (e) {
+    // If CORS prevents ImageData scan, fallback to default center-top ratios
+    return { x: 0.5, y: 0.22, width: 0.25 };
+  }
+  
+  const data = imgData.data;
+  let totalX = 0;
+  let totalY = 0;
+  let skinCount = 0;
+  
+  let minSkinX = scanWidth;
+  let maxSkinX = 0;
+  let minSkinY = scanHeight;
+  let maxSkinY = 0;
+
+  // Scan only the top 75% of the photo where heads are located
+  const scanLimitY = Math.round(scanHeight * 0.75);
+
+  for (let y = 0; y < scanLimitY; y++) {
+    for (let x = 0; x < scanWidth; x++) {
+      const idx = (y * scanWidth + x) * 4;
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+      
+      // Normalized human skin color detection rule (highly robust across all skin tones!)
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const isSkin = (r > 60 && g > 40 && b > 20 && 
+                      (max - min) > 10 && 
+                      Math.abs(r - g) > 8 && 
+                      r > g && r > b);
+                      
+      if (isSkin) {
+        totalX += x;
+        totalY += y;
+        skinCount++;
+        
+        if (x < minSkinX) minSkinX = x;
+        if (x > maxSkinX) maxSkinX = x;
+        if (y < minSkinY) minSkinY = y;
+        if (y > maxSkinY) maxSkinY = y;
+      }
+    }
+  }
+
+  // If we found a reasonable skin cluster, calculate the head location
+  if (skinCount > 100) {
+    const avgX = totalX / skinCount;
+    
+    // Normalized ratio coordinates (0.0 to 1.0)
+    const ratioX = avgX / scanWidth;
+    
+    // Forehead/top of head is slightly higher than the center of the skin (centroid)
+    const ratioY = minSkinY / scanHeight;
+    
+    // The width of the skin cluster defines the size of the head!
+    const ratioWidth = (maxSkinX - minSkinX) / scanWidth;
+    
+    return {
+      x: ratioX,
+      y: ratioY,
+      width: ratioWidth
+    };
+  }
+
+  // Fallback to center-top default coordinates if no face cluster detected
+  return { x: 0.5, y: 0.22, width: 0.25 };
 }
 
 // Draws cute high-resolution emoji stickers programmatically over photo slots
-function drawStickersToSlot(x, y, w, h) {
+function drawStickersToSlot(snapshot, x, y, w, h) {
   if (activeSticker === 'none') return;
   
+  // Call our automatic face detection algorithm!
+  const face = detectFaceInPhoto(snapshot, w, h);
+  
+  // Map normalized face ratios to target slot pixel coordinates
+  const faceCenterX = x + w * face.x;
+  const faceTopY = y + h * face.y;
+  
+  // Face width in pixels defines the dynamic scale factor!
+  const facePixelWidth = w * face.width;
+  
+  // Determine standard emoji size based on face width (about 70% of the face width)
+  const emojiSize = Math.max(22, Math.min(80, facePixelWidth * 0.7));
+  
   ctx.save();
-  // Ensure cute modern emojis display on Windows, iOS, Android, and macOS beautifully
-  ctx.font = '36px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+  ctx.font = `${emojiSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   
-  // High contrast shadow drop for stickers readability on any lighting
+  // High contrast shadow drop for stickers readability
   ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
   ctx.shadowBlur = 6;
   ctx.shadowOffsetX = 2;
@@ -484,52 +581,54 @@ function drawStickersToSlot(x, y, w, h) {
     y = -h / 2;
   }
 
+  // Calculate the custom offset adjustments added on top of automatic positioning
+  const finalY = faceTopY + stickerYOffset;
+  
   if (activeSticker === 'cat') {
-    // Cute Cat Ears Dekorasii on top of head!
-    ctx.fillText('🐱', x + w / 2, y + h * 0.22 + stickerYOffset);
-    ctx.font = '22px "Segoe UI Emoji"';
+    // Cute Cat Ears on top of detected forehead line!
+    ctx.fillText('🐱', faceCenterX, finalY - emojiSize * 0.3);
+    ctx.font = `${emojiSize * 0.6}px "Segoe UI Emoji"`;
     ctx.fillText('🌸', x + 25, y + h - 25);
     ctx.fillText('🌸', x + w - 25, y + h - 25);
 
   } else if (activeSticker === 'crown') {
-    // Golden crown floating perfectly on top of head!
-    ctx.fillText('👑', x + w / 2, y + h * 0.20 + stickerYOffset);
-    ctx.font = '20px "Segoe UI Emoji"';
-    ctx.fillText('✨', x + w / 2 - 35, y + h * 0.20 + 10 + stickerYOffset);
-    ctx.fillText('✨', x + w / 2 + 35, y + h * 0.20 + 10 + stickerYOffset);
+    // Golden crown sitting majestically on forehead!
+    ctx.fillText('👑', faceCenterX, finalY - emojiSize * 0.4);
+    ctx.font = `${emojiSize * 0.5}px "Segoe UI Emoji"`;
+    ctx.fillText('✨', faceCenterX - emojiSize * 0.8, finalY - emojiSize * 0.3);
+    ctx.fillText('✨', faceCenterX + emojiSize * 0.8, finalY - emojiSize * 0.3);
 
   } else if (activeSticker === 'sparkles') {
     // Magic glowing sparkles
-    ctx.font = '28px "Segoe UI Emoji"';
+    ctx.font = `${emojiSize * 0.7}px "Segoe UI Emoji"`;
     ctx.fillText('✨', x + 25, y + h * 0.20 + stickerYOffset);
     ctx.fillText('✨', x + w - 25, y + h - 25);
     ctx.fillText('💫', x + w - 28, y + h * 0.22 + stickerYOffset);
     ctx.fillText('🌟', x + 28, y + h - 30);
 
   } else if (activeSticker === 'glasses') {
-    // Funny retro cool shades worn exactly on the eyes/face!
-    ctx.font = '42px "Segoe UI Emoji"';
-    ctx.fillText('🕶️', x + w / 2, y + h * 0.38 + stickerYOffset);
+    // Funny shades sitting exactly on the eyes/face center!
+    ctx.fillText('🕶️', faceCenterX, finalY + emojiSize * 0.6);
 
   } else if (activeSticker === 'hearts') {
     // Lovely hearts floating on head
-    ctx.font = '28px "Segoe UI Emoji"';
-    ctx.fillText('💖', x + 25, y + h * 0.20 + stickerYOffset);
-    ctx.fillText('💝', x + w - 25, y + h * 0.20 + stickerYOffset);
-    ctx.fillText('💕', x + w / 2, y + h - 30);
+    ctx.font = `${emojiSize * 0.7}px "Segoe UI Emoji"`;
+    ctx.fillText('💖', faceCenterX - emojiSize * 0.7, finalY - emojiSize * 0.3);
+    ctx.fillText('💝', faceCenterX + emojiSize * 0.7, finalY - emojiSize * 0.3);
+    ctx.fillText('💕', faceCenterX, y + h - 30);
 
   } else if (activeSticker === 'devil') {
-    // Cute little devil horns sitting on top of head!
-    ctx.fillText('😈', x + w / 2, y + h * 0.20 + stickerYOffset);
-    ctx.font = '22px "Segoe UI Emoji"';
+    // Devil horns sitting perfectly on the detected forehead line!
+    ctx.fillText('😈', faceCenterX, finalY - emojiSize * 0.4);
+    ctx.font = `${emojiSize * 0.6}px "Segoe UI Emoji"`;
     ctx.fillText('🔥', x + 25, y + h - 25);
     ctx.fillText('🔥', x + w - 25, y + h - 25);
 
   } else if (activeSticker === 'blush') {
-    // Blushing sweet face cheeks aligned with face height!
-    ctx.font = '30px "Segoe UI Emoji"';
-    ctx.fillText('😊', x + w/2 - 50, y + h * 0.40 + stickerYOffset);
-    ctx.fillText('😊', x + w/2 + 50, y + h * 0.40 + stickerYOffset);
+    // Blushing sweet face cheeks aligned perfectly on left & right cheeks relative to face width!
+    ctx.font = `${emojiSize * 0.7}px "Segoe UI Emoji"`;
+    ctx.fillText('😊', faceCenterX - facePixelWidth * 0.4, finalY + emojiSize * 0.8);
+    ctx.fillText('😊', faceCenterX + facePixelWidth * 0.4, finalY + emojiSize * 0.8);
   }
 
   ctx.restore();
