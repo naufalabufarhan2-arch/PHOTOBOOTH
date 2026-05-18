@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PHOTOBOOTH TRE-PAGI A</title>
-    <meta name="description" content="Premium class photobooth with 8 layouts, 8 decorative templates, customized typography, and automated pose-by-pose countdowns." />
+    <meta name="description" content="Premium class photobooth with 12 layouts, 12 decorative templates, customized typography, and automated pose-by-pose countdowns." />
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
     <div class="app-container">
         <!-- Sidebar for Settings -->
         <aside class="sidebar">
-            <!-- 1. Layout Selector Section (8 Options) -->
+            <!-- 1. Layout Selector Section (12 Options) -->
             <div class="settings-section">
                 <h2>1. Choose Photo Layout</h2>
                 <div class="layout-selector">
@@ -44,8 +44,6 @@
                         </div>
                         <span>Single Portrait</span>
                     </button>
-                    
-                    <!-- NEW ADVANCED LAYOUTS -->
                     <button class="layout-card" data-layout="combo-grid">
                         <div class="layout-icon combo-4">
                             <span class="big"></span>
@@ -71,10 +69,38 @@
                         </div>
                         <span>2 Narrow Portrait</span>
                     </button>
+                    
+                    <!-- 4 NEW EXTRA LAYOUTS -->
+                    <button class="layout-card" data-layout="trio-combo">
+                        <div class="layout-icon combo-3">
+                            <span class="big"></span>
+                            <div class="row"><span></span><span></span></div>
+                        </div>
+                        <span>1 Big + 2 Small</span>
+                    </button>
+                    <button class="layout-card" data-layout="grid-2x2-wide">
+                        <div class="layout-icon grid-4-wide">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <span>2x2 Landscape</span>
+                    </button>
+                    <button class="layout-card" data-layout="trio-portrait">
+                        <div class="layout-icon trio-3">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span>Trio Square Grid</span>
+                    </button>
+                    <button class="layout-card" data-layout="double-strip-3">
+                        <div class="layout-icon strip-double-3">
+                            <div class="col"><span></span><span></span><span></span></div>
+                            <div class="col"><span></span><span></span><span></span></div>
+                        </div>
+                        <span>Double 3-Strip</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- 2. Frame Design Selector Section (8 Options) -->
+            <!-- 2. Frame Design Selector Section (12 Options) -->
             <div class="settings-section">
                 <h2>2. Select Frame Design</h2>
                 <div class="template-selector">
@@ -94,8 +120,6 @@
                         <div class="template-preview minimalist"></div>
                         <span>Elegant Minimal</span>
                     </button>
-                    
-                    <!-- NEW PREMIUM BINGKAI -->
                     <button class="template-card" data-template="cherry">
                         <div class="template-preview cherry"></div>
                         <span>Sakura Blossom</span>
@@ -112,6 +136,24 @@
                         <div class="template-preview y2k"></div>
                         <span>Y2K Starry Dream</span>
                     </button>
+                    
+                    <!-- 4 NEW PREMIUM BINGKAI -->
+                    <button class="template-card" data-template="newspaper">
+                        <div class="template-preview newspaper"></div>
+                        <span>TRE Daily Press</span>
+                    </button>
+                    <button class="template-card" data-template="matrix">
+                        <div class="template-preview matrix"></div>
+                        <span>Digital Matrix</span>
+                    </button>
+                    <button class="template-card" data-template="sunset">
+                        <div class="template-preview sunset"></div>
+                        <span>Sunset Glow</span>
+                    </button>
+                    <button class="template-card" data-template="denim">
+                        <div class="template-preview denim"></div>
+                        <span>90s Retro Denim</span>
+                    </button>
                 </div>
             </div>
             
@@ -120,6 +162,76 @@
                 <h2>3. Custom Caption</h2>
                 <div class="customization">
                     <input type="text" id="captionInput" value="TRE-PAGI A" placeholder="Add custom text..." maxlength="20" />
+                </div>
+            </div>
+
+            <!-- 4. Filter Selection Section -->
+            <div class="settings-section">
+                <h2>4. Choose Photo Filter</h2>
+                <div class="filter-selector">
+                    <button class="filter-card active" data-filter="normal">
+                        <div class="filter-preview normal">✨</div>
+                        <span>Normal</span>
+                    </button>
+                    <button class="filter-card" data-filter="grayscale">
+                        <div class="filter-preview grayscale">👤</div>
+                        <span>B&W Retro</span>
+                    </button>
+                    <button class="filter-card" data-filter="vintage">
+                        <div class="filter-preview vintage">🍂</div>
+                        <span>Warm Vintage</span>
+                    </button>
+                    <button class="filter-card" data-filter="cyan">
+                        <div class="filter-preview cyan">🧊</div>
+                        <span>Cool Cyan</span>
+                    </button>
+                    <button class="filter-card" data-filter="blush">
+                        <div class="filter-preview blush">🌸</div>
+                        <span>Soft Blush</span>
+                    </button>
+                    <button class="filter-card" data-filter="vivid">
+                        <div class="filter-preview vivid">🌈</div>
+                        <span>Chrome Vivid</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. Cute Stickers / Emojis Section -->
+            <div class="settings-section">
+                <h2>5. Add Cute Emojis</h2>
+                <div class="sticker-selector">
+                    <button class="sticker-card active" data-sticker="none">
+                        <span class="sticker-emoji">🚫</span>
+                        <span>No Emoji</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="cat">
+                        <span class="sticker-emoji">🐱</span>
+                        <span>Cute Cat</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="crown">
+                        <span class="sticker-emoji">👑</span>
+                        <span>Royal Crown</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="sparkles">
+                        <span class="sticker-emoji">✨</span>
+                        <span>Magic Sparkles</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="glasses">
+                        <span class="sticker-emoji">🕶️</span>
+                        <span>Cool Shades</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="hearts">
+                        <span class="sticker-emoji">💖</span>
+                        <span>Love Hearts</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="devil">
+                        <span class="sticker-emoji">😈</span>
+                        <span>Lil Devil</span>
+                    </button>
+                    <button class="sticker-card" data-sticker="blush">
+                        <span class="sticker-emoji">😊</span>
+                        <span>Blush Cheeks</span>
+                    </button>
                 </div>
             </div>
         </aside>

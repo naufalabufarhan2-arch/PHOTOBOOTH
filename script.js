@@ -12,12 +12,16 @@ const statusBadge = document.getElementById('statusBadge');
 const captionInput = document.getElementById('captionInput');
 const templateCards = document.querySelectorAll('.template-card');
 const layoutCards = document.querySelectorAll('.layout-card');
+const filterCards = document.querySelectorAll('.filter-card');
+const stickerCards = document.querySelectorAll('.sticker-card');
 
 const ctx = canvas.getContext('2d');
 
 // Configurations
 let activeTemplate = 'polaroid';
 let activeLayout = 'four-cuts';
+let activeFilter = 'normal';
+let activeSticker = 'none';
 let countdownInterval = null;
 let stream = null;
 let photosTaken = []; // Array of offscreen canvases holding intermediate shots
@@ -32,7 +36,13 @@ const LAYOUTS = {
   'combo-grid': { photosNeeded: 4, width: 600, height: 920 },      // 1 Big, 3 Small
   'grid-2x3': { photosNeeded: 6, width: 640, height: 1050 },      // 2x3 grid
   'double-landscape': { photosNeeded: 2, width: 600, height: 750 },// 2 wide photos
-  'double-portrait': { photosNeeded: 2, width: 360, height: 680 }  // 2 narrow photos
+  'double-portrait': { photosNeeded: 2, width: 360, height: 680 }, // 2 narrow photos
+  
+  // 4 New extra layouts
+  'trio-combo': { photosNeeded: 3, width: 600, height: 850 },       // 1 Big, 2 Small
+  'grid-2x2-wide': { photosNeeded: 4, width: 640, height: 820 },   // 2x2 Landscape
+  'trio-portrait': { photosNeeded: 3, width: 360, height: 880 },   // 3 square slots stacked
+  'double-strip-3': { photosNeeded: 6, width: 640, height: 950 }   // 2 strips of 3 side-by-side
 };
 
 // Expanded Pose Recommendations for up to 6 poses
@@ -92,6 +102,37 @@ layoutCards.forEach(card => {
 
     // Reset captured photos if layout changes to prevent mismatched grids
     resetPhoto();
+  });
+});
+
+// Bind Filter selectors (Dynamic Live Video Feed and Canvas rendering)
+filterCards.forEach(card => {
+  card.addEventListener('click', () => {
+    filterCards.forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    activeFilter = card.dataset.filter;
+    
+    // Apply real-time visual filter class to live camera
+    video.className = 'filter-' + activeFilter;
+    
+    // Live update final canvas preview
+    if (photosTaken.length > 0) {
+      renderFinalLayout();
+    }
+  });
+});
+
+// Bind Cute Sticker selectors (Live Canvas rendering)
+stickerCards.forEach(card => {
+  card.addEventListener('click', () => {
+    stickerCards.forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    activeSticker = card.dataset.sticker;
+    
+    // Live update final canvas preview
+    if (photosTaken.length > 0) {
+      renderFinalLayout();
+    }
   });
 });
 
@@ -212,7 +253,89 @@ function drawPhotoToSlot(snapshot, targetX, targetY, targetWidth, targetHeight) 
     sy = (snapshot.height - sHeight) / 2;
   }
 
+  // Determine Canvas filter
+  let canvasFilter = 'none';
+  if (activeFilter === 'grayscale') canvasFilter = 'grayscale(1)';
+  else if (activeFilter === 'vintage') canvasFilter = 'sepia(0.7) contrast(1.15) brightness(0.95)';
+  else if (activeFilter === 'cyan') canvasFilter = 'hue-rotate(180deg) saturate(1.2)';
+  else if (activeFilter === 'blush') canvasFilter = 'sepia(0.15) saturate(1.25) hue-rotate(330deg)';
+  else if (activeFilter === 'vivid') canvasFilter = 'saturate(1.6) contrast(1.15)';
+
+  ctx.save();
+  ctx.filter = canvasFilter;
   ctx.drawImage(snapshot, sx, sy, sWidth, sHeight, targetX, targetY, targetWidth, targetHeight);
+  ctx.restore();
+
+  // Draw cute emojis and stickers on top of the slot
+  drawStickersToSlot(targetX, targetY, targetWidth, targetHeight);
+}
+
+// Draws cute high-resolution emoji stickers programmatically over photo slots
+function drawStickersToSlot(x, y, w, h) {
+  if (activeSticker === 'none') return;
+  
+  ctx.save();
+  // Ensure cute modern emojis display on Windows, iOS, Android, and macOS beautifully
+  ctx.font = '36px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  
+  // High contrast shadow drop for stickers readability on any lighting
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  if (activeSticker === 'cat') {
+    // Cute Cat Ears Dekorasii
+    ctx.fillText('🐱', x + w / 2, y + 25);
+    ctx.font = '22px "Segoe UI Emoji"';
+    ctx.fillText('🌸', x + 25, y + h - 25);
+    ctx.fillText('🌸', x + w - 25, y + h - 25);
+
+  } else if (activeSticker === 'crown') {
+    // Golden crown floating
+    ctx.fillText('👑', x + w / 2, y + 25);
+    ctx.font = '20px "Segoe UI Emoji"';
+    ctx.fillText('✨', x + w / 2 - 35, y + 35);
+    ctx.fillText('✨', x + w / 2 + 35, y + 35);
+
+  } else if (activeSticker === 'sparkles') {
+    // Magic glowing sparkles
+    ctx.font = '28px "Segoe UI Emoji"';
+    ctx.fillText('✨', x + 25, y + 25);
+    ctx.fillText('✨', x + w - 25, y + h - 25);
+    ctx.fillText('💫', x + w - 28, y + 30);
+    ctx.fillText('🌟', x + 28, y + h - 30);
+
+  } else if (activeSticker === 'glasses') {
+    // Funny retro cool shades worn in face area
+    ctx.font = '42px "Segoe UI Emoji"';
+    ctx.fillText('🕶️', x + w / 2, y + h * 0.45);
+
+  } else if (activeSticker === 'hearts') {
+    // Lovely hearts
+    ctx.font = '28px "Segoe UI Emoji"';
+    ctx.fillText('💖', x + 25, y + 25);
+    ctx.fillText('💝', x + w - 25, y + 25);
+    ctx.fillText('💕', x + w / 2, y + h - 30);
+
+  } else if (activeSticker === 'devil') {
+    // Cute little devil
+    ctx.fillText('😈', x + w / 2, y + 25);
+    ctx.font = '22px "Segoe UI Emoji"';
+    ctx.fillText('🔥', x + 25, y + h - 25);
+    ctx.fillText('🔥', x + w - 25, y + h - 25);
+
+  } else if (activeSticker === 'blush') {
+    // Blushing sweet face cheeks
+    ctx.font = '30px "Segoe UI Emoji"';
+    ctx.fillText('😊', x + 35, y + h - 35);
+    ctx.fillText('😊', x + w - 35, y + h - 35);
+  }
+
+  ctx.restore();
+}
 }
 
 // Combines all captured poses onto the final Canvas with frame background and overlays
@@ -344,6 +467,80 @@ function renderFinalLayout() {
       }
       drawInnerFrameOutline(borderOffset, targetY, slotWidth, slotHeight);
     }
+
+  } else if (activeLayout === 'trio-combo') {
+    // 1 Big + 2 Small (3 photos)
+    const bigWidth = canvas.width - (borderOffset * 2);
+    const bigHeight = (canvas.height - borderOffset - bottomOffset - gap) * 0.55;
+    
+    const smallWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
+    const smallHeight = canvas.height - borderOffset - bottomOffset - gap - bigHeight;
+
+    // Big Photo slot
+    if (photosTaken[0]) {
+      drawPhotoToSlot(photosTaken[0], borderOffset, borderOffset, bigWidth, bigHeight);
+    }
+    drawInnerFrameOutline(borderOffset, borderOffset, bigWidth, bigHeight);
+
+    // 2 Small slots
+    for (let i = 0; i < 2; i++) {
+      const targetX = borderOffset + i * (smallWidth + gap);
+      const targetY = borderOffset + bigHeight + gap;
+      if (photosTaken[i + 1]) {
+        drawPhotoToSlot(photosTaken[i + 1], targetX, targetY, smallWidth, smallHeight);
+      }
+      drawInnerFrameOutline(targetX, targetY, smallWidth, smallHeight);
+    }
+
+  } else if (activeLayout === 'grid-2x2-wide') {
+    // 2x2 Landscape grid
+    const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - gap) / 2;
+
+    const coordinates = [
+      { x: borderOffset, y: borderOffset },
+      { x: borderOffset + slotWidth + gap, y: borderOffset },
+      { x: borderOffset, y: borderOffset + slotHeight + gap },
+      { x: borderOffset + slotWidth + gap, y: borderOffset + slotHeight + gap }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const coord = coordinates[i];
+      if (photosTaken[i]) {
+        drawPhotoToSlot(photosTaken[i], coord.x, coord.y, slotWidth, slotHeight);
+      }
+      drawInnerFrameOutline(coord.x, coord.y, slotWidth, slotHeight);
+    }
+
+  } else if (activeLayout === 'trio-portrait') {
+    // 3 Square slots stacked vertically
+    const slotWidth = canvas.width - (borderOffset * 2);
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+
+    for (let i = 0; i < 3; i++) {
+      const targetY = borderOffset + i * (slotHeight + gap);
+      if (photosTaken[i]) {
+        drawPhotoToSlot(photosTaken[i], borderOffset, targetY, slotWidth, slotHeight);
+      }
+      drawInnerFrameOutline(borderOffset, targetY, slotWidth, slotHeight);
+    }
+
+  } else if (activeLayout === 'double-strip-3') {
+    // 2 strips of 3 side-by-side (6 Poses)
+    const slotWidth = (canvas.width - (borderOffset * 2) - gap) / 2;
+    const slotHeight = (canvas.height - borderOffset - bottomOffset - (2 * gap)) / 3;
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 2; col++) {
+        const i = col * 3 + row; // Column-major indexing for dual strips
+        const targetX = borderOffset + col * (slotWidth + gap);
+        const targetY = borderOffset + row * (slotHeight + gap);
+        if (photosTaken[i]) {
+          drawPhotoToSlot(photosTaken[i], targetX, targetY, slotWidth, slotHeight);
+        }
+        drawInnerFrameOutline(targetX, targetY, slotWidth, slotHeight);
+      }
+    }
   }
 
   // 3. Draw Watermark, captions, logos at bottom
@@ -412,6 +609,26 @@ function drawTemplateBackground() {
     grad.addColorStop(0.6, '#cbd5e1');
     grad.addColorStop(1, '#475569');
     ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'newspaper') {
+    // Retro Newsprint Cream
+    ctx.fillStyle = '#fdfaf2';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'matrix') {
+    // Dark binary digital code black
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'sunset') {
+    // Warm Golden Sunset gradient
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, '#f97316'); // Orange
+    grad.addColorStop(0.6, '#facc15'); // Gold
+    grad.addColorStop(1, '#eab308'); // Amber
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'denim') {
+    // Indigo Denim fabric blue
+    ctx.fillStyle = '#1e3a8a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
@@ -588,6 +805,109 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.font = '800 13px "Outfit", sans-serif';
     ctx.fillStyle = '#3b82f6';
     ctx.fillText(`Y2K SPACE • ${dateTime}`, canvas.width / 2, textY + 25);
+
+  } else if (activeTemplate === 'newspaper') {
+    // Newspaper border styling (vintage cream and black ink lines)
+    ctx.save();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    // Draw horizontal separator line above bottom panel
+    ctx.beginPath();
+    ctx.moveTo(margin, canvas.height - bottomOffset + 10);
+    ctx.lineTo(canvas.width - margin, canvas.height - bottomOffset + 10);
+    ctx.stroke();
+
+    // Newspaper Typography
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 24px "Outfit", serif, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`🗞️ TRE DAILY PRESS: ${caption.toUpperCase() || "CLASSIC EDITION"}`, canvas.width / 2, textY);
+
+    ctx.font = 'bold italic 12px serif';
+    ctx.fillStyle = '#555555';
+    ctx.fillText(`PUBLISHED ON ${dateTime} • PRICE: FREE`, canvas.width / 2, textY + 25);
+    ctx.restore();
+
+  } else if (activeTemplate === 'matrix') {
+    // Matrix neon binary code drop down graphics
+    ctx.save();
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+    ctx.font = '10px monospace';
+    // Draw columns of binary code inside vertical borders
+    for (let x = 6; x < margin; x += 10) {
+      for (let y = margin; y < canvas.height - 20; y += 14) {
+        if (Math.random() > 0.4) {
+          ctx.fillText(Math.random() > 0.5 ? "1" : "0", x, y);
+          ctx.fillText(Math.random() > 0.5 ? "0" : "1", canvas.width - x - 4, y);
+        }
+      }
+    }
+    
+    // Digital green glowing text
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 22px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`> ${caption.toUpperCase() || "MAINFRAME_"}`, margin + 10, textY);
+
+    ctx.font = '13px monospace';
+    ctx.fillStyle = '#86efac';
+    ctx.textAlign = 'right';
+    ctx.fillText(`SEC_PORT: ${dateTime}`, margin + width - 10, textY + 5);
+    ctx.restore();
+
+  } else if (activeTemplate === 'sunset') {
+    // Warm Sunset glow sparkles
+    ctx.save();
+    ctx.fillStyle = '#78350f';
+    
+    // Sparkles
+    const drawSunsetSparkle = (x, y, r) => {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.fill();
+    };
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.8)';
+    drawSunsetSparkle(margin + 20, textY - 10, 6);
+    drawSunsetSparkle(canvas.width - margin - 20, textY + 10, 4);
+
+    // Warm elegant calligraphy text
+    ctx.fillStyle = '#78350f';
+    ctx.font = 'bold 30px "Satisfy", cursive, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(caption || "Golden Hour 🌅", canvas.width / 2, textY);
+
+    ctx.font = '600 13px "Outfit", sans-serif';
+    ctx.fillStyle = '#92400e';
+    ctx.fillText(`SUNSET VIBES • ${dateTime}`, canvas.width / 2, textY + 25);
+    ctx.restore();
+
+  } else if (activeTemplate === 'denim') {
+    // Denim jeans stitches along borders
+    ctx.save();
+    ctx.strokeStyle = '#fbbf24'; // Yellow stitching thread
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([8, 6]); // Dashed stitch effect!
+    
+    // Outer border stitch
+    const stitchOffset = 8;
+    ctx.strokeRect(stitchOffset, stitchOffset, canvas.width - (stitchOffset * 2), canvas.height - (stitchOffset * 2));
+    
+    // Stitch around bottom text panel
+    ctx.beginPath();
+    ctx.moveTo(stitchOffset, canvas.height - bottomOffset + 10);
+    ctx.lineTo(canvas.width - stitchOffset, canvas.height - bottomOffset + 10);
+    ctx.stroke();
+    
+    // Denim Typography
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`👖 ${caption.toUpperCase() || "DENIM CLASSICS"}`, canvas.width / 2, textY);
+
+    ctx.font = '800 13px monospace';
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText(`90S ED. // ${dateTime}`, canvas.width / 2, textY + 25);
+    ctx.restore();
   }
 }
 
