@@ -631,6 +631,49 @@ canvas {
   50% { opacity: 0.5; }
 }
 
+@keyframes premiumFlash {
+  0% { opacity: 1; background: #ffffff; }
+  40% { opacity: 1; background: #ffffff; }
+  100% { opacity: 0; background: transparent; }
+}
+
+@keyframes slideUpFade {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDownFade {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Apply professional page-load transitions to active studio view and cards */
+.app-container.show-booth .main-booth {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.setup-header, .settings-section {
+  animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.layout-card, .template-card, .filter-card, .sticker-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.layout-card:hover, .template-card:hover, .filter-card:hover, .sticker-card:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.15);
+}
+
+.camera-wrapper {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s;
+}
+
+.camera-wrapper:hover {
+  transform: scale(1.01) translateY(-2px);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.95), 0 0 35px rgba(139, 92, 246, 0.3);
+}
+
 /* Filter Selector Grid */
 .filter-selector {
   display: grid;
@@ -956,5 +999,4 @@ body:has(.show-booth) {
   .main-booth h1 {
     font-size: 1.8rem;
   }
-}
 }

@@ -22,6 +22,37 @@ const appContainer = document.querySelector('.app-container');
 
 const ctx = canvas.getContext('2d');
 
+// Pre-loaded Minions Image with automatic white background remover!
+const minionsImg = new Image();
+minionsImg.src = 'assets/minions.png';
+let minionsKeyedCanvas = null;
+
+minionsImg.onload = () => {
+  const off = document.createElement('canvas');
+  off.width = minionsImg.width;
+  off.height = minionsImg.height;
+  const oCtx = off.getContext('2d');
+  oCtx.drawImage(minionsImg, 0, 0);
+  try {
+    const imgData = oCtx.getImageData(0, 0, off.width, off.height);
+    const data = imgData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i+1];
+      const b = data[i+2];
+      // If the color is close to solid white, make it completely transparent!
+      if (r > 240 && g > 240 && b > 240) {
+        data[i+3] = 0;
+      }
+    }
+    oCtx.putImageData(imgData, 0, 0);
+    minionsKeyedCanvas = off;
+  } catch (e) {
+    console.warn("CORS blocked ImageData scan on local files. Using raw Minions image instead.");
+    minionsKeyedCanvas = minionsImg;
+  }
+};
+
 // Configurations
 let activeTemplate = 'polaroid';
 let activeLayout = 'four-cuts';
@@ -371,7 +402,20 @@ function drawPhotoToSlot(snapshot, targetX, targetY, targetWidth, targetHeight) 
 
   ctx.save();
   ctx.filter = canvasFilter;
-  ctx.drawImage(snapshot, sx, sy, sWidth, sHeight, targetX, targetY, targetWidth, targetHeight);
+  
+  // SPEKTRA TILT: If activeTemplate is 'retro-pop', dynamically tilt slots to match reference pop-art!
+  if (activeTemplate === 'retro-pop') {
+    const cx = targetX + targetWidth / 2;
+    const cy = targetY + targetHeight / 2;
+    ctx.translate(cx, cy);
+    
+    // Tilt alternate slots left/right by 3.5 degrees to look incredibly hand-assembled!
+    const rotateRad = (targetX < canvas.width / 2) ? -0.06 : 0.06;
+    ctx.rotate(rotateRad);
+    ctx.drawImage(snapshot, sx, sy, sWidth, sHeight, -targetWidth / 2, -targetHeight / 2, targetWidth, targetHeight);
+  } else {
+    ctx.drawImage(snapshot, sx, sy, sWidth, sHeight, targetX, targetY, targetWidth, targetHeight);
+  }
   ctx.restore();
 
   // Draw cute emojis and stickers on top of the slot
@@ -1067,8 +1111,8 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.font = 'bold 36px "Playfair Display", "Georgia", serif';
     ctx.textAlign = 'center';
     
-    const headlineText = caption.toUpperCase() || "KOTA METRO HARI INI";
-    ctx.fillText(headlineText, canvas.width / 2, 70);
+    const currentCaption = document.getElementById('captionInput').value.trim() || "KOTA METRO HARI INI";
+    ctx.fillText(currentCaption, canvas.width / 2, 70);
     
     // 2. Draw sub-headline texts
     ctx.font = 'bold 13px "Playfair Display", "Georgia", serif';
@@ -1309,16 +1353,28 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.fillText('🍌', 45, 75);
     ctx.fillText('🍌', canvas.width - 85, 75);
     
-    // Minion vector/character emojis in bottom denim strip
-    ctx.fillText('💛', canvas.width / 2 - 60, canvas.height - 95);
-    ctx.fillText('🕶️', canvas.width / 2 - 60, canvas.height - 95);
-    ctx.fillText('💙', canvas.width / 2, canvas.height - 95);
-    ctx.fillText('💛', canvas.width / 2 + 60, canvas.height - 95);
+    // Draw the gorgeous transparent-keyed real Minions clipart image at the bottom denim strip!
+    const drawTarget = minionsKeyedCanvas || minionsImg;
+    if (drawTarget) {
+      // Calculate centered aspect ratio dimensions to fit the denim footer nicely!
+      const maxW = canvas.width - (margin * 2) - 40;
+      const maxH = 110;
+      const aspect = drawTarget.width / drawTarget.height || 1.33;
+      let targetW = maxW;
+      let targetH = maxW / aspect;
+      if (targetH > maxH) {
+        targetH = maxH;
+        targetW = maxH * aspect;
+      }
+      const targetX = (canvas.width - targetW) / 2;
+      const targetY = canvas.height - 145; // Centered inside the denim region
+      ctx.drawImage(drawTarget, targetX, targetY, targetW, targetH);
+    }
     
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 16px "Outfit", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText("BANANA BANANA! 🍌", canvas.width / 2, canvas.height - 40);
+    ctx.fillText("BANANA BANANA! 🍌", canvas.width / 2, canvas.height - 15);
     ctx.restore();
   }
 }
