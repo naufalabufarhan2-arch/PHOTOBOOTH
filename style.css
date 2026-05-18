@@ -356,6 +356,12 @@ body {
 .template-preview.sunset { background: linear-gradient(135deg, #f97316, #eab308); }
 .template-preview.denim { background: #1e3a8a; border: 1.5px dashed #fbbf24; }
 
+/* 4 SPECTACULAR NEW FRAMES */
+.template-preview.retro-pop { background: repeating-linear-gradient(45deg, #d97706, #dc2626 20px, #0891b2 20px, #ea580c 40px); }
+.template-preview.foto-series { background: #f6f4ee; border: 2px double #222222; }
+.template-preview.retro-tv { background: radial-gradient(circle, #fef08a 0%, #14532d 100%); }
+.template-preview.minions-denim { background: linear-gradient(to bottom, #facc15 50%, #1e3a8a 50%); border: 1px dashed #fbbf24; }
+
 
 .template-card span {
   font-size: 0.95rem;

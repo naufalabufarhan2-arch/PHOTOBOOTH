@@ -814,6 +814,73 @@ function drawTemplateBackground() {
     // Indigo Denim fabric blue
     ctx.fillStyle = '#1e3a8a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'retro-pop') {
+    // 1. Colorful 70s retro sunburst rays background!
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const numRays = 18;
+    const colors = ['#d97706', '#dc2626', '#0891b2', '#ea580c']; // Gold, Red, Teal, Orange
+    for (let i = 0; i < numRays; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      const angle1 = (i * 2 * Math.PI) / numRays;
+      const angle2 = ((i + 1) * 2 * Math.PI) / numRays;
+      ctx.arc(cx, cy, canvas.height, angle1, angle2);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+    }
+    // Draw white card face
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 14;
+    ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+  } else if (activeTemplate === 'foto-series') {
+    // Warm clean minimal paper texture cream
+    ctx.fillStyle = '#f6f4ee';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else if (activeTemplate === 'retro-tv') {
+    // 3. Green/cream sunburst rays!
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const numRays = 20;
+    const colors = ['#14532d', '#fef08a']; // Deep Forest Green and Pale Gold Yellow
+    for (let i = 0; i < numRays; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      const angle1 = (i * 2 * Math.PI) / numRays;
+      const angle2 = ((i + 1) * 2 * Math.PI) / numRays;
+      ctx.arc(cx, cy, canvas.height, angle1, angle2);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+    }
+    // Draw white card face
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 14;
+    ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+  } else if (activeTemplate === 'minions-denim') {
+    // 4. Split: Minion yellow header, denim blue bottom footer!
+    ctx.fillStyle = '#facc15'; // Minions Yellow
+    ctx.fillRect(0, 0, canvas.width, 130);
+    
+    // Light pale yellow body
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(0, 130, canvas.width, canvas.height - 280);
+    
+    // Bottom Denim Blue
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
+    
+    // Golden stitch separation line
+    ctx.save();
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 3.5;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 150);
+    ctx.lineTo(canvas.width, canvas.height - 150);
+    ctx.stroke();
+    ctx.restore();
   }
 }
 
@@ -1116,10 +1183,142 @@ function drawTemplateOverlay(margin, width, caption, dateTime) {
     ctx.font = 'bold 24px "Outfit", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`👖 ${caption.toUpperCase() || "DENIM CLASSICS"}`, canvas.width / 2, textY);
-
+ 
     ctx.font = '800 13px monospace';
     ctx.fillStyle = '#fef08a';
     ctx.fillText(`90S ED. // ${dateTime}`, canvas.width / 2, textY + 25);
+    ctx.restore();
+  } else if (activeTemplate === 'retro-pop') {
+    // 1. Retro Pop: Golden pill badge at bottom, emoji stickers on side!
+    ctx.save();
+    
+    // Rounded badge
+    ctx.fillStyle = '#f59e0b'; // Gold Orange
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    const badgeW = 280;
+    const badgeH = 50;
+    const badgeX = (canvas.width - badgeW) / 2;
+    const badgeY = textY - 20;
+    ctx.beginPath();
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 25);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Badge typography
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px "Playfair Display", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(caption.toUpperCase() || "VINTAGE MOMENT", canvas.width / 2, textY + 5);
+    
+    // Floating graphics
+    ctx.font = '36px "Segoe UI Emoji", sans-serif';
+    ctx.fillText('👀', margin + 20, 160);
+    ctx.fillText('💿', canvas.width - margin - 40, 420);
+    ctx.fillText('⚡', canvas.width - margin - 40, canvas.height - 110);
+    ctx.fillText('⭐', margin + 20, canvas.height - 110);
+    ctx.restore();
+
+  } else if (activeTemplate === 'foto-series') {
+    // 2. Foto Series: Classic double borders, serif header, bottom quote box!
+    ctx.save();
+    
+    // Star emblem & small header
+    ctx.fillStyle = '#111111';
+    ctx.font = 'bold 12px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText("✦  KALA BOOTH  ✦", canvas.width / 2, 45);
+    
+    ctx.font = 'italic bold 28px "Playfair Display", Georgia, serif';
+    ctx.fillText("Foto Series", canvas.width / 2, 80);
+    
+    // Title block lines
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#222222';
+    ctx.beginPath();
+    ctx.moveTo(margin, 95);
+    ctx.lineTo(canvas.width - margin, 95);
+    ctx.stroke();
+    
+    ctx.font = 'bold 26px "Playfair Display", Georgia, serif';
+    ctx.fillText(caption.toUpperCase() || "CERITA HARI INI", canvas.width / 2, 125);
+    
+    ctx.font = 'italic 11px serif';
+    ctx.fillStyle = '#555555';
+    ctx.fillText("Hari spesial bersama orang spesial", canvas.width / 2, 145);
+    
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin, 155);
+    ctx.lineTo(canvas.width - margin, 155);
+    ctx.stroke();
+    
+    // Bottom quote block
+    const quoteBoxY = canvas.height - 90;
+    ctx.fillStyle = '#222222';
+    ctx.fillRect(margin + 20, quoteBoxY, canvas.width - (margin * 2) - 40, 48);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px "Playfair Display", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Kebersamaan tumbuh dari hal-hal kecil yang dijalani bersama.", canvas.width / 2, quoteBoxY + 24);
+    ctx.restore();
+
+  } else if (activeTemplate === 'retro-tv') {
+    // 3. Retro TV: Yellow title arch at top, emojis and CRT decals!
+    ctx.save();
+    
+    // Curved/arch title
+    ctx.fillStyle = '#facc15';
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 5.5;
+    ctx.font = 'bold 28px "Playfair Display", Georgia, serif';
+    ctx.textAlign = 'center';
+    
+    ctx.strokeText("SUKA CITA", canvas.width / 2, 60);
+    ctx.fillText("SUKA CITA", canvas.width / 2, 60);
+    
+    ctx.font = 'bold italic 20px "Playfair Display", Georgia, serif';
+    ctx.strokeText(caption.toUpperCase() || "LALUI BERSAMA", canvas.width / 2, 90);
+    ctx.fillText(caption.toUpperCase() || "LALUI BERSAMA", canvas.width / 2, 90);
+    
+    // Smiley icon at top
+    ctx.font = '36px "Segoe UI Emoji", sans-serif';
+    ctx.fillText('😊', canvas.width / 2, 130);
+    
+    // TV stickers at bottom
+    ctx.font = '40px "Segoe UI Emoji", sans-serif';
+    ctx.fillText('📺', canvas.width / 2, canvas.height - 95);
+    ctx.fillText('⚡', margin + 20, canvas.height - 110);
+    ctx.restore();
+
+  } else if (activeTemplate === 'minions-denim') {
+    // 4. Minions Denim: Bright yellow minions comic text, banana emojis!
+    ctx.save();
+    
+    // Bold comic text in header
+    ctx.fillStyle = '#1e3b8a'; // Denim Blue contrast text
+    ctx.font = 'bold 44px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(caption.toUpperCase() || "MINIONS", canvas.width / 2, 80);
+    
+    // Floating banana stickers
+    ctx.font = '40px "Segoe UI Emoji", sans-serif';
+    ctx.fillText('🍌', 45, 75);
+    ctx.fillText('🍌', canvas.width - 85, 75);
+    
+    // Minion vector/character emojis in bottom denim strip
+    ctx.fillText('💛', canvas.width / 2 - 60, canvas.height - 95);
+    ctx.fillText('🕶️', canvas.width / 2 - 60, canvas.height - 95);
+    ctx.fillText('💙', canvas.width / 2, canvas.height - 95);
+    ctx.fillText('💛', canvas.width / 2 + 60, canvas.height - 95);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px "Outfit", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText("BANANA BANANA! 🍌", canvas.width / 2, canvas.height - 40);
     ctx.restore();
   }
 }
