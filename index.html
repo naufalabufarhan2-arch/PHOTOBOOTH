@@ -4,25 +4,86 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Photobooth Experience</title>
-    <meta name="description" content="A sleek web‑based photobooth that captures images from your webcam and lets you download the result instantly." />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <title>Mall-Style Photobooth</title>
+    <meta name="description" content="Premium mall-style photobooth with decorative frame templates and a countdown timer." />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Satisfy&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Photobooth</h1>
-        <div class="camera-wrapper">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="canvas" width="640" height="480"></canvas>
-            <p class="placeholder" id="placeholder">Press "Capture" to take a photo</p>
-        </div>
-        <div class="controls">
-            <button id="captureBtn" class="btn primary">Capture</button>
-            <button id="resetBtn" class="btn neutral hidden">Retake</button>
-            <span id="timeDisplay" class="time-label hidden"></span>
-            <a id="downloadLink" class="btn secondary hidden" download="photo.png">Download</a>
-        </div>
+    <div class="app-container">
+        <!-- Sidebar for Template Settings -->
+        <aside class="sidebar">
+            <h2>Select Frame Template</h2>
+            <div class="template-selector">
+                <button class="template-card active" data-template="polaroid">
+                    <div class="template-preview polaroid"></div>
+                    <span>Classic Polaroid</span>
+                </button>
+                <button class="template-card" data-template="pastel">
+                    <div class="template-preview pastel"></div>
+                    <span>Sweet Pastel</span>
+                </button>
+                <button class="template-card" data-template="cyberpunk">
+                    <div class="template-preview cyberpunk"></div>
+                    <span>Neon Cyberpunk</span>
+                </button>
+                <button class="template-card" data-template="minimalist">
+                    <div class="template-preview minimalist"></div>
+                    <span>Elegant Minimal</span>
+                </button>
+            </div>
+            
+            <div class="customization">
+                <h3>Custom Caption</h3>
+                <input type="text" id="captionInput" placeholder="Add custom text..." maxlength="20" />
+            </div>
+        </aside>
+
+        <!-- Main Photobooth View -->
+        <main class="main-booth">
+            <header>
+                <h1>📸 Retro Mall Photobooth</h1>
+                <p>Pick a template, customize your caption, and strike a pose!</p>
+            </header>
+
+            <div class="booth-container">
+                <!-- Camera view & overlay effects -->
+                <div class="camera-wrapper">
+                    <!-- Live Camera Feed -->
+                    <video id="video" autoplay playsinline></video>
+                    
+                    <!-- Captured Canvas (Hidden/Displayed programmatically) -->
+                    <canvas id="canvas" width="600" height="750"></canvas>
+                    
+                    <!-- Countdown Overlay -->
+                    <div id="countdownOverlay" class="countdown-overlay hidden">
+                        <span id="countdownText">3</span>
+                    </div>
+
+                    <!-- Camera Flash Effect -->
+                    <div id="flashOverlay" class="flash-overlay"></div>
+                </div>
+
+                <!-- Custom Info Badge (Dynamic watermark preview) -->
+                <div id="statusBadge" class="status-badge">Ready to Shoot</div>
+            </div>
+
+            <!-- Photobooth Controls -->
+            <div class="controls">
+                <button id="captureBtn" class="btn primary-btn">
+                    <span class="icon">⚡</span> Start Capture
+                </button>
+                <button id="resetBtn" class="btn neutral-btn hidden">
+                    <span class="icon">🔄</span> Take Another
+                </button>
+                <a id="downloadLink" class="btn success-btn hidden" download="my_photobooth_photo.png">
+                    <span class="icon">💾</span> Save Photo
+                </a>
+            </div>
+        </main>
     </div>
 
     <script src="script.js"></script>
